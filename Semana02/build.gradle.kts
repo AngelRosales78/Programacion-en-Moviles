@@ -22,8 +22,8 @@ kotlin {
 sourceSets {
     main {
         kotlin.srcDirs(
-            "Semana02/SinIA/Lab02CarritoKotlin",
-            "Semana02/ConIA/Lab02CarritoKotlin"
+            "SinIA",
+            "ConIA"
         )
     }
 }
