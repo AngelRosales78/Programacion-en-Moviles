@@ -56,4 +56,23 @@ fun main() {
             i++
         }
     }
+
+    fun calcularDescuento(total: Double): Double {
+        return when {
+            total > 5000 -> total * 0.10
+            total > 3000 -> total * 0.05
+            else -> 0.0
+        }
+    }
+
+    val masCaro = carrito.maxByOrNull { it.precio }
+    if (masCaro != null) {
+        println(String.format("\nProducto mas caro: %s (S/%.2f)", masCaro.nombre, masCaro.precio))
+    }
+
+    val descuento = calcularDescuento(total)
+    val totalConDescuento = total - descuento
+
+    println(String.format("Descuento: S/ %.2f", descuento))
+    println(String.format("TOTAL A PAGAR: S/ %.2f", totalConDescuento))
 }
