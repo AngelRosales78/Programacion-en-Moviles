@@ -7,4 +7,18 @@ fun main() {
     println("=========================================")
     println("   CARRITO DE COMPRAS - TIENDA TECSUP    ")
     println("=========================================")
+
+    val nombreCliente = "Angel Rosales"
+    val carrito = mutableListOf<Producto>()
+
+    println("Cliente: $nombreCliente\n")
+
+    carrito.add(Producto("Laptop HP", 2500.0, 1))
+    carrito.add(Producto("Mouse Logitech", 45.5, 2))
+    carrito.add(Producto("Audifonos Sony", 165.0, 1))
+    carrito.add(Producto("Teclado Redragon", 120.0, 1))
+
+    for (producto in carrito) {
+        println("Producto agregado: ${producto.nombre}")
+    }
 }
