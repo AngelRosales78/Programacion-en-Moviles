@@ -22,6 +22,15 @@ fun main() {
         println("Producto agregado: ${producto.nombre}")
     }
 
+    val subtotal = calcularSubtotal(carrito)
+    val igv = calcularIGV(subtotal)
+    val total = calcularTotal(subtotal, igv)
+
+    println()
+    println(String.format("Subtotal : S/ %.2f", subtotal))
+    println(String.format("IGV (18%%): S/ %.2f", igv))
+    println(String.format("TOTAL    : S/ %.2f", total))
+
     fun calcularSubtotal(productos: List<Producto>): Double {
         var subtotal = 0.0
         for (p in productos) {
