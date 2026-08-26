@@ -1,4 +1,5 @@
 package sinia
+
 data class Producto(
     val nombre: String,
     val precio: Double,
@@ -23,6 +24,9 @@ fun main() {
     for (producto in carrito) {
         println("Producto agregado: ${producto.nombre}")
     }
+
+    // Detalle de la compra
+    mostrarDetalle(carrito)
 
     val subtotal = calcularSubtotal(carrito)
     val igv = calcularIGV(subtotal)
