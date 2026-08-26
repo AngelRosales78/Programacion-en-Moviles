@@ -1,29 +1,42 @@
 plugins {
-    kotlin("jvm") version "2.0.0"
+    kotlin("jvm") version "2.4.10"
     application
 }
+
+group = "org.example"
+version = "1.0-SNAPSHOT"
 
 repositories {
     mavenCentral()
 }
 
+// Iguala las versiones de Java y Kotlin exactamente en 17
+java {
+}
+
+tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
+    compilerOptions {
+        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
+    }
+}
 dependencies {
-    testImplementation(kotlin("test"))
+    implementation(kotlin("stdlib-jdk8"))
 }
-
-tasks.test {
-    useJUnitPlatform()
-}
-
 kotlin {
-    jvmToolchain(21)
+    jvmToolchain(17)
 }
 
+// Le enseña a Gradle dónde están tus archivos sin mover carpetas
 sourceSets {
     main {
-        kotlin.srcDirs(
-            "SinIA",
-            "ConIA"
-        )
+        kotlin.srcDirs("ConIA", "SinIA")
     }
+}
+
+application {
+    mainClass.set("conia.CarritoKt")
+}
+
+tasks.withType<JavaExec> {
+    standardInput = System.`in`
 }
