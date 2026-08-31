@@ -34,12 +34,12 @@ fun main() {
 
     // 2. Registro de fechas
     println("\n--- Registro de Fechas (Formato: DD/MM/YYYY) ---")
-    val fechaPrestamo = pedirFecha(scanner, formatterEntrada, "Fecha de prestamo (ej. 01/01/2026): ")
+    val fechaPrestamo = pedirFecha(scanner, formatterEntrada, "Fecha de prestamo: ")
 
     val fechaPactada = fechaPrestamo.plusDays(DIAS_PRESTAMO_PERMITIDOS)
     println("-> Fecha limite asignada automaticamente: ${fechaPactada.format(formatterEntrada)}")
 
-    val fechaEntrega = pedirFecha(scanner, formatterEntrada, "Fecha real de entrega (ej. 18/01/2026): ")
+    val fechaEntrega = pedirFecha(scanner, formatterEntrada, "Fecha real de entrega: ")
 
     // 3. Calculo de atraso
     val diasRetrasoCalculados = ChronoUnit.DAYS.between(fechaPactada, fechaEntrega)
