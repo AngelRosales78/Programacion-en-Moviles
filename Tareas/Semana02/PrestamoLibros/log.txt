@@ -1,2 +1,3 @@
 Modulo de consola de Kotlin configurado.
 Logica de calculo de fechas integrada.
+Salida en formato tabla finalizada.
