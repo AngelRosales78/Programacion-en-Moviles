@@ -1,6 +1,5 @@
 package com.rosalesm.lab03registroproducto
 
-import android.R
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -28,7 +27,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.rosalesm.lab03registroproducto.ui.theme.Lab03RegistroProductoTheme
 
@@ -70,6 +68,15 @@ fun PantallaRegistro(modifier: Modifier = Modifier) {
         )
         Spacer(modifier = Modifier.height(24.dp))
 
+        OutlinedTextField(
+            value = nombre,
+            onValueChange = { nombre = it },
+            label = { Text("Nombre del producto") },
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
         Row(modifier = Modifier.fillMaxWidth()) {
 
             OutlinedTextField(
@@ -91,11 +98,13 @@ fun PantallaRegistro(modifier: Modifier = Modifier) {
 
         Spacer(modifier = Modifier.height(24.dp))
         Button(
-            onClick = { mostrarResumen = true},
+            onClick = { mostrarResumen = true },
             modifier = Modifier.fillMaxWidth()
         ) {
             Text("AGREGAR PRODUCTO")
         }
+
+        Spacer(modifier = Modifier.height(24.dp))
 
         if (mostrarResumen) {
             val precioNum = precio.toDoubleOrNull() ?: 0.0
