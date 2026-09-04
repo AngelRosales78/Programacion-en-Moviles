@@ -17,6 +17,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -34,13 +35,15 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun PantallaRegistroNotas(modifier: Modifier = Modifier) {
-    // Estados para las 4 notas de los cursos (0f a 20f)
     var notaFundamentos by remember { mutableFloatStateOf(0f) }
     var notaPoo by remember { mutableFloatStateOf(0f) }
     var notaMoviles by remember { mutableFloatStateOf(0f) }
     var notaBd by remember { mutableFloatStateOf(0f) }
 
-    // Fondo con degradado suave
+    var redondearPromedio by remember { mutableStateOf(false) }
+    var confirmacionChecked by remember { mutableStateOf(false) }
+    var mostrarResumen by remember { mutableStateOf(false) }
+
     val fondoGradient = Brush.verticalGradient(
         colors = listOf(Color(0xFFEDE7F6), Color(0xFFF3E5F5))
     )
@@ -55,7 +58,7 @@ fun PantallaRegistroNotas(modifier: Modifier = Modifier) {
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
         ) {
-            // Barra superior (TopBar)
+            // TopBar
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -71,7 +74,6 @@ fun PantallaRegistroNotas(modifier: Modifier = Modifier) {
             }
 
             Column(modifier = Modifier.padding(16.dp)) {
-                // Título y subtítulo
                 Text(
                     text = "Notas del ciclo",
                     style = MaterialTheme.typography.titleMedium,
@@ -85,11 +87,66 @@ fun PantallaRegistroNotas(modifier: Modifier = Modifier) {
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // Filas para asignación de notas mediante Sliders
                 FilaCursoSlider("Fundamentos de Programación", "20%", notaFundamentos) { notaFundamentos = it }
                 FilaCursoSlider("Programación Orientada a Objetos", "25%", notaPoo) { notaPoo = it }
                 FilaCursoSlider("Programación en Móviles", "30%", notaMoviles) { notaMoviles = it }
                 FilaCursoSlider("Base de Datos", "25%", notaBd) { notaBd = it }
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "Redondear promedio final",
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                    Switch(
+                        checked = redondearPromedio,
+                        onCheckedChange = { redondearPromedio = it },
+                        colors = SwitchDefaults.colors(
+                            checkedThumbColor = Color(0xFF5E35B1),
+                            checkedTrackColor = Color(0xFFD1C4E9)
+                        )
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Checkbox(
+                        checked = confirmacionChecked,
+                        onCheckedChange = { confirmacionChecked = it },
+                        colors = CheckboxDefaults.colors(checkedColor = Color(0xFF5E35B1))
+                    )
+                    Text(
+                        text = "Confirmo que las notas son correctas",
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Button(
+                    onClick = { mostrarResumen = true },
+                    enabled = confirmacionChecked,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(50.dp),
+                    shape = RoundedCornerShape(25.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF5E35B1))
+                ) {
+                    Text(
+                        text = "CALCULAR PROMEDIO",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 16.sp
+                    )
+                }
             }
         }
     }
@@ -122,7 +179,6 @@ fun FilaCursoSlider(
                 )
             }
 
-            // Badge numérico en vivo
             Surface(
                 color = Color(0xFF5E35B1).copy(alpha = 0.12f),
                 shape = RoundedCornerShape(8.dp)
@@ -136,7 +192,6 @@ fun FilaCursoSlider(
             }
         }
 
-        // Control Slider para valores entre 0 y 20
         Slider(
             value = notaActual,
             onValueChange = onNotaChange,
