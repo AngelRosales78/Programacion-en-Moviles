@@ -59,7 +59,6 @@ fun PantallaRegistroNotas(modifier: Modifier = Modifier) {
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
         ) {
-            // TopBar
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -163,10 +162,10 @@ fun PantallaRegistroNotas(modifier: Modifier = Modifier) {
                     val promFinal = if (redondearPromedio) promPonderado.roundToInt().toFloat() else promPonderado
 
                     val (textoObservacion, colorChip) = when {
-                        promFinal >= 17f -> "EXCELENTE" to Color(0xFF1B5E20)       // Verde oscuro
-                        promFinal >= 13f -> "APROBADO" to Color(0xFF2E7D32)        // Verde
-                        promFinal >= 10f -> "EN RECUPERACIÓN" to Color(0xFFF57F17) // Ámbar
-                        else -> "DESAPROBADO" to Color(0xFFC62828)                 // Rojo
+                        promFinal >= 17f -> "EXCELENTE" to Color(0xFF1B5E20)
+                        promFinal >= 13f -> "APROBADO" to Color(0xFF2E7D32)
+                        promFinal >= 10f -> "EN RECUPERACIÓN" to Color(0xFFF57F17)
+                        else -> "DESAPROBADO" to Color(0xFFC62828)
                     }
 
                     Card(
@@ -214,6 +213,28 @@ fun PantallaRegistroNotas(modifier: Modifier = Modifier) {
                             }
                         }
                     }
+
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    Text(
+                        text = "✓ Promedio calculado correctamente",
+                        color = Color(0xFF2E7D32),
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.Medium
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(32.dp))
+
+                Box(
+                    modifier = Modifier.fillMaxWidth(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "Desarrollado por: rosalesm",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = Color.Gray
+                    )
                 }
             }
         }
