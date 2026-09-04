@@ -18,6 +18,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlin.math.roundToInt
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -146,6 +147,73 @@ fun PantallaRegistroNotas(modifier: Modifier = Modifier) {
                         fontWeight = FontWeight.Bold,
                         fontSize = 16.sp
                     )
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                if (!mostrarResumen) {
+                    Text(
+                        text = "Asigna las notas y confirma para calcular",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = Color.Gray,
+                        modifier = Modifier.padding(vertical = 8.dp)
+                    )
+                } else {
+                    val promPonderado = (notaFundamentos * 0.20f) + (notaPoo * 0.25f) + (notaMoviles * 0.30f) + (notaBd * 0.25f)
+                    val promFinal = if (redondearPromedio) promPonderado.roundToInt().toFloat() else promPonderado
+
+                    val (textoObservacion, colorChip) = when {
+                        promFinal >= 17f -> "EXCELENTE" to Color(0xFF1B5E20)       // Verde oscuro
+                        promFinal >= 13f -> "APROBADO" to Color(0xFF2E7D32)        // Verde
+                        promFinal >= 10f -> "EN RECUPERACIÓN" to Color(0xFFF57F17) // Ámbar
+                        else -> "DESAPROBADO" to Color(0xFFC62828)                 // Rojo
+                    }
+
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = CardDefaults.cardColors(containerColor = Color.White),
+                        shape = RoundedCornerShape(16.dp),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                    ) {
+                        Column(modifier = Modifier.padding(16.dp)) {
+                            Text(
+                                text = "Promedio ponderado:  " + String.format("%.2f", promPonderado),
+                                style = MaterialTheme.typography.bodyLarge
+                            )
+
+                            Row(verticalAlignment = Alignment.Bottom) {
+                                Text(
+                                    text = "Promedio final:  " + if (redondearPromedio) promFinal.toInt() else String.format("%.2f", promFinal),
+                                    style = MaterialTheme.typography.titleLarge,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color(0xFF5E35B1)
+                                )
+                                if (redondearPromedio) {
+                                    Spacer(modifier = Modifier.width(6.dp))
+                                    Text(
+                                        text = "(redondeado)",
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = Color.Gray
+                                    )
+                                }
+                            }
+
+                            Spacer(modifier = Modifier.height(12.dp))
+
+                            Surface(
+                                color = colorChip.copy(alpha = 0.15f),
+                                shape = RoundedCornerShape(20.dp)
+                            ) {
+                                Text(
+                                    text = textoObservacion,
+                                    color = colorChip,
+                                    fontWeight = FontWeight.Bold,
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp)
+                                )
+                            }
+                        }
+                    }
                 }
             }
         }
