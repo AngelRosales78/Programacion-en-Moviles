@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -16,6 +17,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -46,11 +48,14 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun PantallaRegistro(modifier: Modifier = Modifier) {
-
+    // Estados principales
     var nombre by remember { mutableStateOf("") }
     var precio by remember { mutableStateOf("") }
     var cantidad by remember { mutableStateOf("") }
     var mostrarResumen by remember { mutableStateOf(false) }
+
+    // Nuevos estados para la Parte B (IA)
+    var mensajeError by remember { mutableStateOf("") }
 
     Column(
         modifier = modifier
@@ -58,7 +63,7 @@ fun PantallaRegistro(modifier: Modifier = Modifier) {
             .padding(16.dp)
     ) {
         Text(
-            text = "Nuevo Producto",
+            text = "Nuevo producto",
             style = MaterialTheme.typography.headlineSmall
         )
         Text(
@@ -68,26 +73,23 @@ fun PantallaRegistro(modifier: Modifier = Modifier) {
         )
         Spacer(modifier = Modifier.height(24.dp))
 
+        // Campos de texto
         OutlinedTextField(
             value = nombre,
             onValueChange = { nombre = it },
             label = { Text("Nombre del producto") },
             modifier = Modifier.fillMaxWidth()
         )
-
         Spacer(modifier = Modifier.height(16.dp))
 
         Row(modifier = Modifier.fillMaxWidth()) {
-
             OutlinedTextField(
                 value = precio,
                 onValueChange = { precio = it },
                 label = { Text("Precio (S/)") },
                 modifier = Modifier.weight(1f)
             )
-
             Spacer(modifier = Modifier.width(16.dp))
-
             OutlinedTextField(
                 value = cantidad,
                 onValueChange = { cantidad = it },
@@ -97,20 +99,64 @@ fun PantallaRegistro(modifier: Modifier = Modifier) {
         }
 
         Spacer(modifier = Modifier.height(24.dp))
-        Button(
-            onClick = { mostrarResumen = true },
-            modifier = Modifier.fillMaxWidth()
+
+        // Botones Agregar y Limpiar en una sola Fila
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            Text("AGREGAR PRODUCTO")
+            Button(
+                onClick = {
+                    val p = precio.toDoubleOrNull()
+                    val c = cantidad.toIntOrNull()
+
+                    if (nombre.isBlank() || precio.isBlank() || cantidad.isBlank()) {
+                        mensajeError = "Por favor, completa todos los campos."
+                        mostrarResumen = false
+                    } else if (p == null || c == null) {
+                        mensajeError = "Ingresa valores numéricos válidos en precio y cantidad."
+                        mostrarResumen = false
+                    } else {
+                        mensajeError = ""
+                        mostrarResumen = true
+                    }
+                },
+                modifier = Modifier.weight(1f)
+            ) {
+                Text("AGREGAR")
+            }
+
+            OutlinedButton(
+                onClick = {
+                    nombre = ""
+                    precio = ""
+                    cantidad = ""
+                    mostrarResumen = false
+                    mensajeError = ""
+                },
+                modifier = Modifier.weight(1f)
+            ) {
+                Text("LIMPIAR")
+            }
         }
 
-        Spacer(modifier = Modifier.height(24.dp))
+        // Mensaje de Error
+        if (mensajeError.isNotEmpty()) {
+            Spacer(modifier = Modifier.height(16.dp))
+            Text(
+                text = mensajeError,
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.bodyMedium
+            )
+        }
 
+        // Card de Resumen
         if (mostrarResumen) {
             val precioNum = precio.toDoubleOrNull() ?: 0.0
             val cantidadNum = cantidad.toIntOrNull() ?: 0
             val importe = precioNum * cantidadNum
 
+            Spacer(modifier = Modifier.height(24.dp))
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 colors = CardDefaults.cardColors(
@@ -118,34 +164,21 @@ fun PantallaRegistro(modifier: Modifier = Modifier) {
                 )
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
-                    Text(
-                        text = if (nombre.isBlank()) "Sin Nombre" else nombre,
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(text = "Precio: S/ " + String.format("%.2f", precioNum))
-                    Text(text = "Cantidad: $cantidadNum")
-                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(nombre, style = MaterialTheme.typography.titleLarge)
+                    Text("Precio: S/ " + String.format("%.2f", precioNum))
+                    Text("Cantidad: $cantidadNum")
                     Text(
                         text = "Importe total: S/ " + String.format("%.2f", importe),
-                        fontWeight = FontWeight.Bold,
+                        style = MaterialTheme.typography.titleMedium,
                         color = MaterialTheme.colorScheme.primary
                     )
                 }
             }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
+            Spacer(modifier = Modifier.height(8.dp))
             Text(
                 text = "✔ Producto registrado correctamente",
                 color = Color(0xFF2E7D32),
-                fontWeight = FontWeight.Medium
-            )
-        } else {
-            Text(
-                text = "Aún no has registrado ningún producto",
-                color = MaterialTheme.colorScheme.outline
+                style = MaterialTheme.typography.bodyMedium
             )
         }
     }
