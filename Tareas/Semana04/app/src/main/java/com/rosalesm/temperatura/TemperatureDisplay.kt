@@ -22,5 +22,16 @@ fun TemperatureDisplay() {
             text = "Temperatura: $temperatura°C",
             style = MaterialTheme.typography.headlineMedium
         )
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Button(onClick = { temperatura++ }) {
+                Text("Subir")
+            }
+            Button(onClick = { temperatura-- }) {
+                Text("Bajar")
+            }
+        }
+
     }
 }
