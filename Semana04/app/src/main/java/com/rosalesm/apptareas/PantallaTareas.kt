@@ -111,6 +111,21 @@ fun PantallaTareas() {
         )
 
         Spacer(modifier = Modifier.height(16.dp))
-
+        LazyColumn {
+            items(listaTareas, key = { it.id }) { tarea ->
+                ItemTarea(
+                    tarea = tarea,
+                    onEliminar = {
+                        listaTareas.remove(tarea)
+                    },
+                    onCambiarEstado = { completada ->
+                        val index = listaTareas.indexOf(tarea)
+                        if (index != -1) {
+                            listaTareas[index] = listaTareas[index].copy(completada = completada)
+                        }
+                    }
+                )
+            }
+        }
     }
 }
