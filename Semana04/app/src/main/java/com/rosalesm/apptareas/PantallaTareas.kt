@@ -53,3 +53,64 @@ fun ItemTarea(
         }
     }
 }
+@Composable
+fun PantallaTareas() {
+    // ==============================================================================
+    // COMMIT 2: Crear PantallaTareas con ingreso de datos y contador
+    // Descripción: Declaración de estados observados (texto, contador ID, lista)
+    // y construcción de la UI superior con TextField, botón 'Agregar' y el total.
+    // ==============================================================================
+    var textoTarea by remember { mutableStateOf("") }
+    var contadorId by remember { mutableStateOf(1) }
+    val listaTareas = remember { mutableStateListOf<Tarea>() }
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp)
+    ) {
+        Text(
+            text = "Lista de tareas - Tecsup",
+            style = MaterialTheme.typography.headlineMedium
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        OutlinedTextField(
+            value = textoTarea,
+            onValueChange = { textoTarea = it },
+            label = { Text("Ingrese una tarea") },
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Button(
+            onClick = {
+                if (textoTarea.isNotBlank()) {
+                    listaTareas.add(
+                        Tarea(
+                            id = contadorId,
+                            nombre = textoTarea
+                        )
+                    )
+                    contadorId++
+                    textoTarea = ""
+                }
+            },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Agregar tarea")
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Text(
+            text = "Total de tareas: ${listaTareas.size}",
+            style = MaterialTheme.typography.titleMedium
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+    }
+}
