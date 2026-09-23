@@ -1,10 +1,11 @@
 package com.rosalesm.navegacion.navigation
 
 sealed class Screen(val route: String) {
-    object Home : Screen(route = "home")
-    object List : Screen(route = "list")
-    object Profile : Screen(route = "profile")
-    object Detail : Screen(route = "detail/{itemId}") {
-        fun createRoute(itemId: Int): String = "detail/$itemId"
+    object Login : Screen("login")
+    object Home : Screen("home")
+    object List : Screen("list")
+    object Profile : Screen("profile")
+    object Detail : Screen("detail/{itemId}") {
+        fun createRoute(itemId: Int) = "detail/$itemId"
     }
 }
