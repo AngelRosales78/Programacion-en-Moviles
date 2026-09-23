@@ -6,13 +6,13 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.rosalesm.clinicasalud.data.Appointment
 import com.rosalesm.clinicasalud.data.MockData
 import com.rosalesm.clinicasalud.navigation.Screen
 
@@ -24,11 +24,9 @@ fun BookAppointmentScreen(
 ) {
     val doctor = MockData.doctors.find { it.id == doctorId } ?: MockData.doctors.first()
 
-    // Opciones de fecha y hora disponibles (Mínimo 3 opciones de cada una)
     val dates = listOf("Jue 26", "Vie 27", "Sáb 28")
     val times = listOf("9:00 am", "10:30 am", "3:00 pm")
 
-    // Estados para la selección única
     var selectedDate by remember { mutableStateOf(dates[1]) }
     var selectedTime by remember { mutableStateOf(times[1]) }
 
@@ -64,7 +62,6 @@ fun BookAppointmentScreen(
 
                 Spacer(modifier = Modifier.height(12.dp))
 
-                // Selección única de fecha
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(12.dp),
                     modifier = Modifier.fillMaxWidth()
@@ -74,12 +71,7 @@ fun BookAppointmentScreen(
                         FilterChip(
                             selected = isSelected,
                             onClick = { selectedDate = date },
-                            label = {
-                                Text(
-                                    text = date,
-                                    modifier = Modifier.padding(vertical = 8.dp)
-                                )
-                            },
+                            label = { Text(text = date, modifier = Modifier.padding(vertical = 8.dp)) },
                             colors = FilterChipDefaults.filterChipColors(
                                 selectedContainerColor = Color(0xFF5E35B1),
                                 selectedLabelColor = Color.White
@@ -100,7 +92,6 @@ fun BookAppointmentScreen(
 
                 Spacer(modifier = Modifier.height(12.dp))
 
-                // Selección única de hora
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(12.dp),
                     modifier = Modifier.fillMaxWidth()
@@ -121,9 +112,18 @@ fun BookAppointmentScreen(
                 }
             }
 
-            // Botón de Confirmación
+            // Guardar la nueva cita en la lista compartida
             Button(
                 onClick = {
+                    val newAppointment = Appointment(
+                        id = (System.currentTimeMillis() % 10000).toInt(),
+                        doctorName = doctor.name,
+                        date = selectedDate,
+                        time = selectedTime,
+                        status = "Confirmada"
+                    )
+                    MockData.sampleAppointments.add(newAppointment)
+
                     navController.navigate(
                         Screen.Confirmation.createRoute(
                             doctorName = doctor.name,

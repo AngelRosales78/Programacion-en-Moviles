@@ -1,6 +1,7 @@
 package com.rosalesm.clinicasalud.data
 
-// Modelo para los médicos
+import androidx.compose.runtime.mutableStateListOf
+
 data class Doctor(
     val id: Int,
     val name: String,
@@ -9,16 +10,14 @@ data class Doctor(
     val bio: String
 )
 
-// Modelo para las citas agendadas
 data class Appointment(
     val id: Int,
     val doctorName: String,
     val date: String,
     val time: String,
-    val status: String // "Confirmada" o "Completada"
+    val status: String
 )
 
-// Datos de prueba para simular la base de datos local (SIN ViewModel / SIN IA)
 object MockData {
     val specialties = listOf("Todas", "Cardiología", "Pediatría", "Dermatología")
 
@@ -46,20 +45,6 @@ object MockData {
         )
     )
 
-    val sampleAppointments = listOf(
-        Appointment(
-            id = 101,
-            doctorName = "Dra. Ana Torres",
-            date = "Viernes 27",
-            time = "10:30 am",
-            status = "Confirmada"
-        ),
-        Appointment(
-            id = 102,
-            doctorName = "Dr. Luis Vega",
-            date = "Miércoles 15",
-            time = "3:00 pm",
-            status = "Completada"
-        )
-    )
+    // Lista mutable vacía por defecto
+    val sampleAppointments = mutableStateListOf<Appointment>()
 }

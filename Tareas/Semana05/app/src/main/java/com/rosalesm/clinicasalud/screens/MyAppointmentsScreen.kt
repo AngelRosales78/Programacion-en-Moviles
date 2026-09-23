@@ -24,13 +24,8 @@ import com.rosalesm.clinicasalud.data.MockData
 @Composable
 fun MyAppointmentsScreen(navController: NavController) {
     // Lista reactiva de citas en el estado local
-    val appointments = remember {
-        mutableStateListOf<Appointment>().apply {
-            addAll(MockData.sampleAppointments)
-        }
-    }
+    val appointments = MockData.sampleAppointments
 
-    // Estado para controlar qué cita se va a cancelar
     var appointmentToCancel by remember { mutableStateOf<Appointment?>(null) }
 
     Scaffold(
@@ -186,6 +181,38 @@ fun AppointmentCard(
                     )
                 }
             }
+        }
+    }
+}
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun MedicalHistoryScreen(navController: NavController) {
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("Historial médico", fontWeight = FontWeight.Bold) },
+                navigationIcon = {
+                    IconButton(onClick = { navController.popBackStack() }) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Volver"
+                        )
+                    }
+                }
+            )
+        }
+    ) { padding ->
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = "Sin registros médicos anteriores",
+                color = Color.Gray,
+                fontSize = 16.sp
+            )
         }
     }
 }
