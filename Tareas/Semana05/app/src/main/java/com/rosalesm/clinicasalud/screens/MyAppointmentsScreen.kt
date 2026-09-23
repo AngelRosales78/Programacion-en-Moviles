@@ -8,7 +8,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -23,6 +23,16 @@ import com.rosalesm.clinicasalud.data.MockData
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MyAppointmentsScreen(navController: NavController) {
+    // Lista reactiva de citas en el estado local
+    val appointments = remember {
+        mutableStateListOf<Appointment>().apply {
+            addAll(MockData.sampleAppointments)
+        }
+    }
+
+    // Estado para controlar qué cita se va a cancelar
+    var appointmentToCancel by remember { mutableStateOf<Appointment?>(null) }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -48,20 +58,66 @@ fun MyAppointmentsScreen(navController: NavController) {
                 verticalArrangement = Arrangement.spacedBy(12.dp),
                 modifier = Modifier.fillMaxWidth()
             ) {
-                items(MockData.sampleAppointments) { appointment ->
-                    AppointmentCard(appointment = appointment)
+                items(appointments) { appointment ->
+                    AppointmentCard(
+                        appointment = appointment,
+                        onCancelClick = { appointmentToCancel = appointment }
+                    )
                 }
             }
+        }
+
+        // Diálogo de confirmación para cancelar cita
+        appointmentToCancel?.let { appointment ->
+            AlertDialog(
+                onDismissRequest = { appointmentToCancel = null },
+                title = { Text("Cancelar cita") },
+                text = { Text("¿Estás seguro de que deseas cancelar la cita con ${appointment.doctorName} el ${appointment.date}?") },
+                confirmButton = {
+                    TextButton(
+                        onClick = {
+                            val index = appointments.indexOfFirst { it.id == appointment.id }
+                            if (index != -1) {
+                                appointments[index] = appointments[index].copy(status = "Cancelada")
+                            }
+                            appointmentToCancel = null
+                        }
+                    ) {
+                        Text("Confirmar", color = Color.Red)
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { appointmentToCancel = null }) {
+                        Text("Volver")
+                    }
+                }
+            )
         }
     }
 }
 
 @Composable
-fun AppointmentCard(appointment: Appointment) {
-    val isConfirmed = appointment.status == "Confirmada"
-    val barColor = if (isConfirmed) Color(0xFF5E35B1) else Color.Gray
-    val badgeBg = if (isConfirmed) Color(0xFFE8F5E9) else Color(0xFFEEEEEE)
-    val badgeTextColor = if (isConfirmed) Color(0xFF2E7D32) else Color(0xFF616161)
+fun AppointmentCard(
+    appointment: Appointment,
+    onCancelClick: () -> Unit
+) {
+    val barColor = when (appointment.status) {
+        "Confirmada" -> Color(0xFF5E35B1)
+        "Cancelada" -> Color(0xFFD32F2F)
+        else -> Color.Gray
+    }
+
+    val badgeBg = when (appointment.status) {
+        "Confirmada" -> Color(0xFFE8F5E9)
+        "Cancelada" -> Color(0xFFFFEBEE)
+        else -> Color(0xFFEEEEEE)
+    }
+
+    val badgeTextColor = when (appointment.status) {
+        "Confirmada" -> Color(0xFF2E7D32)
+        "Cancelada" -> Color(0xFFC62828)
+        else -> Color(0xFF616161)
+    }
 
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -75,7 +131,6 @@ fun AppointmentCard(appointment: Appointment) {
                 .height(IntrinsicSize.Min),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Indidador de barra lateral según estado
             Box(
                 modifier = Modifier
                     .width(6.dp)
@@ -88,12 +143,24 @@ fun AppointmentCard(appointment: Appointment) {
                     .fillMaxWidth()
                     .padding(16.dp)
             ) {
-                Text(
-                    text = appointment.doctorName,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 16.sp,
-                    color = Color(0xFF2C1B4D)
-                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = appointment.doctorName,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 16.sp,
+                        color = Color(0xFF2C1B4D)
+                    )
+
+                    if (appointment.status == "Confirmada") {
+                        TextButton(onClick = onCancelClick) {
+                            Text("Cancelar", fontSize = 12.sp, color = Color.Red)
+                        }
+                    }
+                }
 
                 Spacer(modifier = Modifier.height(4.dp))
 
@@ -105,7 +172,6 @@ fun AppointmentCard(appointment: Appointment) {
 
                 Spacer(modifier = Modifier.height(8.dp))
 
-                // Chip de estado visualmente diferenciado
                 Box(
                     modifier = Modifier
                         .clip(RoundedCornerShape(12.dp))
@@ -120,40 +186,6 @@ fun AppointmentCard(appointment: Appointment) {
                     )
                 }
             }
-        }
-    }
-}
-
-// Vista simple para la sección Historial Médico del Drawer
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun MedicalHistoryScreen(navController: NavController) {
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Historial médico", fontWeight = FontWeight.Bold) },
-                navigationIcon = {
-                    IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Volver"
-                        )
-                    }
-                }
-            )
-        }
-    ) { padding ->
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(
-                text = "Sin registros médicos anteriores",
-                color = Color.Gray,
-                fontSize = 16.sp
-            )
         }
     }
 }
