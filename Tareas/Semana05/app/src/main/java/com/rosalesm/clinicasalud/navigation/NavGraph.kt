@@ -25,17 +25,23 @@ sealed class Screen(val route: String) {
 }
 
 @Composable
-fun AppNavigation(navController: NavHostController) {
+fun AppNavigation(
+    navController: NavHostController,
+    onOpenDrawer: () -> Unit = {}
+) {
     NavHost(
         navController = navController,
         startDestination = Screen.Home.route
     ) {
         // 1. Pantalla de Inicio
         composable(Screen.Home.route) {
-            HomeScreen(navController)
+            HomeScreen(
+                navController = navController,
+                onOpenDrawer = onOpenDrawer
+            )
         }
 
-        // 2. Perfil del Médico (Recibe doctorId)
+        // 2. Perfil del Médico
         composable(
             route = Screen.DoctorDetail.route,
             arguments = listOf(navArgument("doctorId") { type = NavType.IntType })
@@ -44,7 +50,7 @@ fun AppNavigation(navController: NavHostController) {
             DoctorDetailScreen(navController, doctorId)
         }
 
-        // 3. Agendar Cita (Recibe doctorId)
+        // 3. Agendar Cita
         composable(
             route = Screen.BookAppointment.route,
             arguments = listOf(navArgument("doctorId") { type = NavType.IntType })
@@ -53,7 +59,7 @@ fun AppNavigation(navController: NavHostController) {
             BookAppointmentScreen(navController, doctorId)
         }
 
-        // 4. Confirmación de Cita (Recibe doctorName, date, time)
+        // 4. Confirmación de Cita
         composable(
             route = Screen.Confirmation.route,
             arguments = listOf(
@@ -73,7 +79,7 @@ fun AppNavigation(navController: NavHostController) {
             MyAppointmentsScreen(navController)
         }
 
-        // 6. Historial Médico (Lógica simple para navegación secundaria)
+        // 6. Historial Médico
         composable(Screen.MedicalHistory.route) {
             MedicalHistoryScreen(navController)
         }

@@ -122,6 +122,10 @@ fun MainAppScreen() {
             }
         }
     ) {
-        AppNavigation(navController = navController)
-    }
+        AppNavigation(
+            navController = navController,
+            onOpenDrawer = {
+                scope.launch { drawerState.open() }
+            }
+        )    }
 }
