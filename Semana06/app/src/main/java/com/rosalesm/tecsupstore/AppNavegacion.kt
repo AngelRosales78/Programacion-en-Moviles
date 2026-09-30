@@ -13,8 +13,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 
-
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppNavegacion() {
@@ -32,7 +30,6 @@ fun AppNavegacion() {
         )
     }
 
-    // Contenedor principal que envuelve la app con el Drawer
     ModalNavigationDrawer(
         drawerState = drawerState,
         drawerContent = {
@@ -70,7 +67,6 @@ fun AppNavegacion() {
                                 .fillMaxSize()
                                 .padding(8.dp)
                         ) {
-                            // Categorías en LazyRow
                             LazyRow(
                                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                                 modifier = Modifier.padding(bottom = 8.dp)
@@ -90,16 +86,52 @@ fun AppNavegacion() {
                                 modifier = Modifier.padding(vertical = 8.dp)
                             )
 
-                            // Lista de productos en LazyColumn
                             LazyColumn {
-                                items(productos) { prod ->
-                                    TarjetaProducto(producto = prod)
+                                items(productos, key = { it.id }) { prod ->
+                                    val isFav = favoritosIds.contains(prod.id)
+                                    TarjetaProducto(
+                                        producto = prod,
+                                        isFavorito = isFav,
+                                        onToggleFavorito = {
+                                            if (isFav) {
+                                                favoritosIds.remove(prod.id)
+                                            } else {
+                                                favoritosIds.add(prod.id)
+                                            }
+                                        }
+                                    )
+                                }
+                            }
+                        }
+                    }
+                    "Favoritos" -> {
+                        val productosFav = productos.filter { favoritosIds.contains(it.id) }
+                        Column(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(16.dp)
+                        ) {
+                            Text(
+                                text = "Mis Favoritos",
+                                style = MaterialTheme.typography.titleLarge
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                            if (productosFav.isEmpty()) {
+                                Text("No tienes productos agregados a favoritos.")
+                            } else {
+                                LazyColumn {
+                                    items(productosFav, key = { it.id }) { prod ->
+                                        TarjetaProducto(
+                                            producto = prod,
+                                            isFavorito = true,
+                                            onToggleFavorito = { favoritosIds.remove(prod.id) }
+                                        )
+                                    }
                                 }
                             }
                         }
                     }
                     else -> {
-                        // Vista para los otros destinos del drawer
                         Box(
                             modifier = Modifier.fillMaxSize(),
                             contentAlignment = Alignment.Center

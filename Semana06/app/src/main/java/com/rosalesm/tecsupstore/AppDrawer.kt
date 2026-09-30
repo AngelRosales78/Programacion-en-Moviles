@@ -16,7 +16,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 
-
 @Composable
 fun AppDrawer(
     destinoActual: String,
@@ -36,7 +35,7 @@ fun AppDrawer(
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = "MR",
+                    text = "AR",
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onPrimaryContainer,
                     style = MaterialTheme.typography.titleMedium
@@ -75,7 +74,6 @@ fun AppDrawer(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(text = titulo)
-                        // Badge con contador reactivo
                         if (titulo == "Favoritos" && cantidadFavoritos > 0) {
                             Badge {
                                 Text(text = cantidadFavoritos.toString())

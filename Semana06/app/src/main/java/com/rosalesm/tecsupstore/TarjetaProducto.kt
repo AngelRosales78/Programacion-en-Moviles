@@ -2,6 +2,7 @@ package com.rosalesm.tecsupstore
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Share
@@ -12,13 +13,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
-
-
 @Composable
 fun TarjetaProducto(
-    producto: Producto
+    producto: Producto,
+    isFavorito: Boolean,
+    onToggleFavorito: () -> Unit
 ) {
-    // Hito 1: Estado expanded para controlar la visibilidad del menú
     var expanded by remember { mutableStateOf(false) }
 
     Card(
@@ -29,7 +29,6 @@ fun TarjetaProducto(
             containerColor = MaterialTheme.colorScheme.surfaceVariant
         )
     ) {
-        // Importante: El DropdownMenu debe ir dentro de un Box junto al botón que lo activa
         Box(modifier = Modifier.padding(16.dp)) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -48,7 +47,6 @@ fun TarjetaProducto(
                     )
                 }
 
-                // Contenedor del icono de 3 puntos y su menú desplegable
                 Box {
                     IconButton(onClick = { expanded = true }) {
                         Icon(
@@ -57,22 +55,24 @@ fun TarjetaProducto(
                         )
                     }
 
-                    // Hitos 2 y 3: DropdownMenu con íconos y separadores
                     DropdownMenu(
                         expanded = expanded,
                         onDismissRequest = { expanded = false }
                     ) {
                         DropdownMenuItem(
-                            text = { Text("Favoritos") },
+                            text = { Text(if (isFavorito) "Quitar de Favoritos" else "Favoritos") },
                             leadingIcon = {
                                 Icon(
-                                    imageVector = Icons.Default.FavoriteBorder,
+                                    imageVector = if (isFavorito) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
                                     contentDescription = null
                                 )
                             },
-                            onClick = { expanded = false }
+                            onClick = {
+                                onToggleFavorito()
+                                expanded = false
+                            }
                         )
-                        HorizontalDivider() // Divisor / Separador
+                        HorizontalDivider()
                         DropdownMenuItem(
                             text = { Text("Compartir") },
                             leadingIcon = {
