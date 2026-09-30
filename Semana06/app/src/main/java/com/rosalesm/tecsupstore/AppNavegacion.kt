@@ -14,12 +14,14 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 
 
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppNavegacion() {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
     var destinoActual by remember { mutableStateOf("Inicio") }
+    val favoritosIds = remember { mutableStateListOf<Int>() }
 
     val categorias = listOf("Más vendidos", "Laptops", "Celulares", "Accesorios")
     val productos = remember {
@@ -36,6 +38,7 @@ fun AppNavegacion() {
         drawerContent = {
             AppDrawer(
                 destinoActual = destinoActual,
+                cantidadFavoritos = favoritosIds.size,
                 onNavegar = { nuevoDestino ->
                     destinoActual = nuevoDestino
                     scope.launch { drawerState.close() }
