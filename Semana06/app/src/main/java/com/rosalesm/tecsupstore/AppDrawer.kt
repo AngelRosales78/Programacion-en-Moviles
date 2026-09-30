@@ -20,11 +20,10 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun AppDrawer(
     destinoActual: String,
+    cantidadFavoritos: Int,
     onNavegar: (String) -> Unit
 ) {
-    // Hito 4: Estrutura con ModalDrawerSheet
     ModalDrawerSheet {
-        // Hito 6: Encabezado personalizado de usuario
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -37,7 +36,7 @@ fun AppDrawer(
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = "AR",
+                    text = "MR",
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onPrimaryContainer,
                     style = MaterialTheme.typography.titleMedium
@@ -45,12 +44,12 @@ fun AppDrawer(
             }
             Spacer(modifier = Modifier.height(12.dp))
             Text(
-                text = "Angel Rosales",
+                text = "Maria Rojas",
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold
             )
             Text(
-                text = "angel.rosales.m@tecsup.edu.pe",
+                text = "maria@tecsup.edu.pe",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -59,7 +58,6 @@ fun AppDrawer(
         HorizontalDivider()
         Spacer(modifier = Modifier.height(12.dp))
 
-        // Opciones del Drawer con sus respectivos íconos
         val opciones = listOf(
             "Inicio" to Icons.Default.Home,
             "Mis pedidos" to Icons.Default.ShoppingCart,
@@ -68,11 +66,24 @@ fun AppDrawer(
             "Cerrar sesión" to Icons.Default.ExitToApp
         )
 
-        // Hito 5 y 6: Ítem activo resaltado y navegación al seleccionar
         opciones.forEach { (titulo, icono) ->
             NavigationDrawerItem(
-                label = { Text(text = titulo) },
-                selected = destinoActual == titulo, // Resalta si es la opción activa
+                label = {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(text = titulo)
+                        // Badge con contador reactivo
+                        if (titulo == "Favoritos" && cantidadFavoritos > 0) {
+                            Badge {
+                                Text(text = cantidadFavoritos.toString())
+                            }
+                        }
+                    }
+                },
+                selected = destinoActual == titulo,
                 onClick = { onNavegar(titulo) },
                 icon = { Icon(imageVector = icono, contentDescription = titulo) },
                 modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
