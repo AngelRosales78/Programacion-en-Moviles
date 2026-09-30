@@ -44,12 +44,12 @@ fun AppDrawer(
             }
             Spacer(modifier = Modifier.height(12.dp))
             Text(
-                text = "Maria Rojas",
+                text = "Angel Rosales",
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold
             )
             Text(
-                text = "maria@tecsup.edu.pe",
+                text = "angel.rosales.m@tecsup.edu.pe",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
