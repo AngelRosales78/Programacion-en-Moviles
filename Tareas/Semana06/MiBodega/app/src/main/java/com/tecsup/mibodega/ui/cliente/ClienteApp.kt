@@ -22,10 +22,7 @@ import com.tecsup.mibodega.ui.cliente.screens.registro.RegistroScreen
 /**
  * "Director de orquesta" de la app cliente:
  * - Tiene el NavHost con las rutas de cada pantalla.
- * - Tiene el estado del carrito (List<ItemCarrito>), que se reparte
- *   hacia abajo a Inicio, Detalle, Carrito y Entrega.
- * Ninguna Screen navega sola ni modifica el carrito directamente:
- * todas reciben funciones (lambdas) desde aquí (state hoisting).
+ * - Maneja el estado del carrito (List<ItemCarrito>).
  */
 private object Rutas {
     const val BIENVENIDA = "bienvenida"
@@ -51,8 +48,8 @@ fun ClienteApp() {
         composable(Rutas.BIENVENIDA) {
             BienvenidaScreen(
                 onRegistrarse = { navController.navigate(Rutas.REGISTRO) },
-                onIniciarSesion = { /* TODO: pantalla de login, aún no está en el mockup */ },
-                onTerminos = { /* TODO: abrir términos y condiciones */ }
+                onIniciarSesion = { navController.navigate(Rutas.INICIO) },
+                onTerminos = { /* Abrir términos y condiciones */ }
             )
         }
 
@@ -60,7 +57,6 @@ fun ClienteApp() {
             RegistroScreen(
                 onVolver = { navController.popBackStack() },
                 onCrearCuenta = { nombre, telefono, direccion, referencia ->
-                    // TODO: guardar estos datos cuando exista el registro real
                     navController.navigate(Rutas.INICIO) {
                         popUpTo(Rutas.BIENVENIDA) { inclusive = true }
                     }
@@ -112,7 +108,7 @@ fun ClienteApp() {
                         when {
                             it.producto.id != producto.id -> it
                             it.cantidad > 1 -> it.copy(cantidad = it.cantidad - 1)
-                            else -> null // si llega a 0, se elimina de la lista
+                            else -> null
                         }
                     }
                 },
@@ -125,10 +121,6 @@ fun ClienteApp() {
     }
 }
 
-/**
- * Si el producto ya está en el carrito, le suma la cantidad;
- * si no, lo agrega como un ItemCarrito nuevo.
- */
 private fun agregarOSumarProducto(
     carrito: List<ItemCarrito>,
     producto: Producto,
