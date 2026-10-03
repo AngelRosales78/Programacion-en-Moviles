@@ -20,6 +20,8 @@ import androidx.compose.ui.unit.dp
  *
  * @param teclado tipo de teclado, ej. KeyboardType.Phone para el teléfono
  */
+
+
 @Composable
 fun CampoTexto(
     etiqueta: String,

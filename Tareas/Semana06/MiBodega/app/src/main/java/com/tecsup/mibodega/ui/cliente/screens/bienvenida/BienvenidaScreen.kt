@@ -40,6 +40,7 @@ import com.tecsup.mibodega.ui.theme.VerdeBodega
  * Pantalla 1: Registro / Login (mockup "Cliente").
  * No sabe navegar sola: recibe qué hacer por parámetro (callbacks).
  */
+
 @Composable
 fun BienvenidaScreen(
     onRegistrarse: () -> Unit,
