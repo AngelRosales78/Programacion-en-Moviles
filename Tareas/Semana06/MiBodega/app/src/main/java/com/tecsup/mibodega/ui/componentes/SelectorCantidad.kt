@@ -1,5 +1,6 @@
 package com.tecsup.mibodega.ui.componentes
 
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row

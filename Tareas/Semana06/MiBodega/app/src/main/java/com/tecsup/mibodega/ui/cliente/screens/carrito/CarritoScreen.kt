@@ -60,6 +60,7 @@ fun CarritoScreen(
     val subtotal = carrito.sumOf { it.producto.precio * it.cantidad }
     val total = subtotal + COSTO_DELIVERY
 
+
     Column(
         modifier = Modifier
             .fillMaxSize()
