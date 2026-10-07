@@ -27,11 +27,10 @@ import com.tecsup.mibodega.ui.theme.AzulEnlace
 import com.tecsup.mibodega.ui.theme.FondoClaro
 import com.tecsup.mibodega.ui.theme.VerdeBodega
 
-private const val USUARIO_CORRECTO = "admin"
-private const val CLAVE_CORRECTA = "1234"
-
 @Composable
 fun BienvenidaScreen(
+    usuarioValido: String = "admin",
+    contrasenaValida: String = "1234",
     onRegistrarse: () -> Unit,
     onIniciarSesion: () -> Unit,
     onTerminos: () -> Unit = {}
@@ -94,7 +93,7 @@ fun BienvenidaScreen(
         Spacer(Modifier.height(24.dp))
     }
 
-    // Modal de Login con validación de credenciales fijas
+    // Modal de Login con validación flexible (admin/1234 o cuenta creada)
     if (mostrarDialogLogin) {
         AlertDialog(
             onDismissRequest = {
@@ -110,20 +109,13 @@ fun BienvenidaScreen(
             },
             text = {
                 Column {
-                    Text(
-                        text = "Ingresa con tus credenciales (admin / 1234)",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    Spacer(modifier = Modifier.height(12.dp))
-
                     OutlinedTextField(
                         value = usuarioText,
                         onValueChange = {
                             usuarioText = it
                             errorLogin = false
                         },
-                        label = { Text("Usuario") },
+                        label = { Text("Usuario o Nombre") },
                         isError = errorLogin,
                         singleLine = true,
                         modifier = Modifier.fillMaxWidth()
@@ -158,8 +150,26 @@ fun BienvenidaScreen(
             confirmButton = {
                 Button(
                     onClick = {
-                        if (usuarioText.trim().lowercase() == USUARIO_CORRECTO && claveText == CLAVE_CORRECTA) {
+                        val uInput = usuarioText.trim()
+                        val cInput = claveText.trim()
+
+                        val uValido = usuarioValido.trim()
+                        val cValida = contrasenaValida.trim()
+
+                        // 1. Acceso con credenciales admin por defecto
+                        val esAdmin = uInput.equals("admin", ignoreCase = true) && cInput == "1234"
+
+                        // 2. Acceso con la cuenta que el usuario acaba de registrar
+                        val primerNombre = uValido.split(" ").firstOrNull() ?: ""
+                        val coincideUsuario = uInput.equals(uValido, ignoreCase = true) ||
+                                (primerNombre.isNotBlank() && uInput.equals(primerNombre, ignoreCase = true))
+                        val coincideClave = (cInput == cValida)
+
+                        val esUsuarioRegistrado = coincideUsuario && coincideClave
+
+                        if (esAdmin || esUsuarioRegistrado) {
                             mostrarDialogLogin = false
+                            errorLogin = false
                             onIniciarSesion()
                         } else {
                             errorLogin = true

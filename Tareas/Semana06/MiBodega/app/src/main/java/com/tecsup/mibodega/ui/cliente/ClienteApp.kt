@@ -37,15 +37,15 @@ fun ClienteApp() {
     // ESTADOS GLOBALES DE LA APLICACIÓN
     var modoOscuro by remember { mutableStateOf(false) }
     var usuarioActual by remember { mutableStateOf<Usuario?>(null) }
+    var contrasenaRegistrada by remember { mutableStateOf<String?>(null) } // <--- GUARDA LA CLAVE CREADA
     var carrito by remember { mutableStateOf<List<ItemCarrito>>(emptyList()) }
     var idsFavoritos by remember { mutableStateOf<Set<Int>>(emptySet()) }
     var historialPedidos by remember { mutableStateOf<List<Pedido>>(emptyList()) }
-    var esDelivery by remember { mutableStateOf(true) } // true = Delivery (S/4.00), false = Recojo (S/0.00)
+    var esDelivery by remember { mutableStateOf(true) }
     var ultimoPedidoRealizado by remember { mutableStateOf<Pedido?>(null) }
 
     val costoEnvio = if (esDelivery) 4.00 else 0.00
 
-    // Modifica la lista de productos agregando la propiedad de esFavorito dinámicamente
     val productosConFavoritos = remember(idsFavoritos) {
         listaProductosFake.map { producto ->
             producto.copy(esFavorito = idsFavoritos.contains(producto.id))
@@ -72,18 +72,22 @@ fun ClienteApp() {
             // PANTALLA 1: BIENVENIDA & LOGIN
             composable(Rutas.BIENVENIDA) {
                 BienvenidaScreen(
+                    usuarioValido = usuarioActual?.nombre ?: "admin", // <--- PASAMOS EL USUARIO CREADO
+                    contrasenaValida = contrasenaRegistrada ?: "1234", // <--- PASAMOS LA CLAVE CREADA
+                    onRegistrarse = { navController.navigate(Rutas.REGISTRO) },
                     onIniciarSesion = {
-                        usuarioActual = Usuario(
-                            nombre = "Cliente Fijo",
-                            telefono = "987654321",
-                            direccion = "Av. Principal 123",
-                            referencia = "Frente a la plaza"
-                        )
+                        if (usuarioActual == null) {
+                            usuarioActual = Usuario(
+                                nombre = "Cliente Fijo",
+                                telefono = "987654321",
+                                direccion = "Av. Principal 123",
+                                referencia = "Frente a la plaza"
+                            )
+                        }
                         navController.navigate(Rutas.INICIO) {
                             popUpTo(Rutas.BIENVENIDA) { inclusive = true }
                         }
-                    },
-                    onRegistrarse = { navController.navigate(Rutas.REGISTRO) }
+                    }
                 )
             }
 
@@ -91,11 +95,13 @@ fun ClienteApp() {
             composable(Rutas.REGISTRO) {
                 RegistroScreen(
                     onVolver = { navController.popBackStack() },
-                    onCrearCuentaExitoso = { nombre, telefono, direccion, referencia ->
+                    onCrearCuentaExitoso = { nombre, telefono, direccion, referencia, contrasena ->
+                        // Guardamos la información creada en los estados globales
                         usuarioActual = Usuario(nombre, telefono, direccion, referencia)
-                        navController.navigate(Rutas.INICIO) {
-                            popUpTo(Rutas.BIENVENIDA) { inclusive = true }
-                        }
+                        contrasenaRegistrada = contrasena
+
+                        // Vuelve al login para iniciar sesión con estos nuevos datos
+                        navController.popBackStack()
                     }
                 )
             }

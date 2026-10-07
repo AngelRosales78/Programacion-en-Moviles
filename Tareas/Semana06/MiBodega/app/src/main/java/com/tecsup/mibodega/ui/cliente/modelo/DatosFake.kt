@@ -13,7 +13,7 @@ data class Pedido(
     val subtotal: Double,
     val costoEnvio: Double,
     val total: Double,
-    val tipoEnvio: String, // "Delivery" o "Recojo en tienda"
+    val tipoEnvio: String,
     val direccion: String,
     val referencia: String,
     val fecha: String = "Hoy",

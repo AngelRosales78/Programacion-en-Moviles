@@ -51,7 +51,6 @@ fun CarritoScreen(
         EncabezadoCarrito(onVolver = onVolver)
 
         if (carrito.isEmpty()) {
-            // VISTA: Carrito Vacío
             Box(
                 modifier = Modifier
                     .weight(1f)
@@ -109,7 +108,8 @@ fun CarritoScreen(
         }
     }
 
-    // Modal de Confirmación antes de eliminar un producto
+
+
     productoAEliminar?.let { producto ->
         AlertDialog(
             onDismissRequest = { productoAEliminar = null },

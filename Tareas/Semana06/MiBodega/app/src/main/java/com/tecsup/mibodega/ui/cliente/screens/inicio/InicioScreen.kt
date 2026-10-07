@@ -52,7 +52,7 @@ fun InicioScreen(
     var ordenPrecio by remember { mutableStateOf(OrdenPrecio.NINGUNO) }
     var mostrarSoloFavoritos by remember { mutableStateOf(false) }
 
-    // Filtrado combinado y ordenamiento por precio
+
     val productosFiltrados = productos.filter { producto ->
         val coincideCategoria = categoriaSeleccionada == "Todos" || producto.categoria == categoriaSeleccionada
         val coincideBusqueda = producto.nombre.contains(textoBusqueda, ignoreCase = true) ||
