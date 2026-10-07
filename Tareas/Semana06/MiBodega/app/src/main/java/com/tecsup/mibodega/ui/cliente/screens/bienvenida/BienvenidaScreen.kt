@@ -3,20 +3,11 @@ package com.tecsup.mibodega.ui.cliente.screens.bienvenida
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeDrawingPadding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Phone
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -24,29 +15,32 @@ import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.tecsup.mibodega.R
 import com.tecsup.mibodega.ui.componentes.BotonPrimario
 import com.tecsup.mibodega.ui.componentes.BotonSecundario
 import com.tecsup.mibodega.ui.theme.AzulEnlace
-import com.tecsup.mibodega.ui.theme.BodegaTheme
 import com.tecsup.mibodega.ui.theme.FondoClaro
 import com.tecsup.mibodega.ui.theme.VerdeBodega
 
-/**
- * Pantalla 1: Registro / Login (mockup "Cliente").
- * No sabe navegar sola: recibe qué hacer por parámetro (callbacks).
- */
+private const val USUARIO_CORRECTO = "admin"
+private const val CLAVE_CORRECTA = "1234"
 
 @Composable
 fun BienvenidaScreen(
     onRegistrarse: () -> Unit,
     onIniciarSesion: () -> Unit,
-    onTerminos: () -> Unit
+    onTerminos: () -> Unit = {}
 ) {
+    var mostrarDialogLogin by remember { mutableStateOf(false) }
+    var usuarioText by remember { mutableStateOf("") }
+    var claveText by remember { mutableStateOf("") }
+    var errorLogin by remember { mutableStateOf(false) }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -90,7 +84,7 @@ fun BienvenidaScreen(
 
         BotonSecundario(
             texto = "Iniciar sesión",
-            onClick = onIniciarSesion
+            onClick = { mostrarDialogLogin = true }
         )
 
         Spacer(Modifier.height(20.dp))
@@ -99,9 +93,94 @@ fun BienvenidaScreen(
 
         Spacer(Modifier.height(24.dp))
     }
-}
 
-// Sub-composables PRIVADOS: solo los usa esta pantalla, por eso no van a "componentes".
+    // Modal de Login con validación de credenciales fijas
+    if (mostrarDialogLogin) {
+        AlertDialog(
+            onDismissRequest = {
+                mostrarDialogLogin = false
+                errorLogin = false
+            },
+            title = {
+                Text(
+                    text = "Iniciar Sesión",
+                    fontWeight = FontWeight.Bold,
+                    style = MaterialTheme.typography.titleLarge
+                )
+            },
+            text = {
+                Column {
+                    Text(
+                        text = "Ingresa con tus credenciales (admin / 1234)",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    OutlinedTextField(
+                        value = usuarioText,
+                        onValueChange = {
+                            usuarioText = it
+                            errorLogin = false
+                        },
+                        label = { Text("Usuario") },
+                        isError = errorLogin,
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    OutlinedTextField(
+                        value = claveText,
+                        onValueChange = {
+                            claveText = it
+                            errorLogin = false
+                        },
+                        label = { Text("Contraseña") },
+                        visualTransformation = PasswordVisualTransformation(),
+                        isError = errorLogin,
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+
+                    if (errorLogin) {
+                        Spacer(modifier = Modifier.height(6.dp))
+                        Text(
+                            text = "Usuario o contraseña incorrectos",
+                            color = MaterialTheme.colorScheme.error,
+                            style = MaterialTheme.typography.bodySmall,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                    }
+                }
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        if (usuarioText.trim().lowercase() == USUARIO_CORRECTO && claveText == CLAVE_CORRECTA) {
+                            mostrarDialogLogin = false
+                            onIniciarSesion()
+                        } else {
+                            errorLogin = true
+                        }
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = VerdeBodega)
+                ) {
+                    Text("Ingresar")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = {
+                    mostrarDialogLogin = false
+                    errorLogin = false
+                }) {
+                    Text("Cancelar")
+                }
+            }
+        )
+    }
+}
 
 @Composable
 private fun IlustracionBodega() {
@@ -147,12 +226,3 @@ private fun PieTerminos(onTerminos: () -> Unit) {
         )
     }
 }
-
-@Preview(showBackground = true, showSystemUi = true)
-@Composable
-private fun BienvenidaPreview() {
-    BodegaTheme {
-        BienvenidaScreen({}, {}, {})
-    }
-}
-

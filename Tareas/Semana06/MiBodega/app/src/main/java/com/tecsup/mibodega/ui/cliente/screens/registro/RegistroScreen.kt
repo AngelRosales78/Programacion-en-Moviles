@@ -1,57 +1,40 @@
 package com.tecsup.mibodega.ui.cliente.screens.registro
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeDrawingPadding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.tecsup.mibodega.ui.componentes.BotonPrimario
-import com.tecsup.mibodega.ui.componentes.CampoTexto
-import com.tecsup.mibodega.ui.theme.BodegaTheme
 import com.tecsup.mibodega.ui.theme.GrisClaro
 import com.tecsup.mibodega.ui.theme.VerdeBodega
 
-/**
- * Pantalla 2: Registro de datos (mockup "Cliente").
- * Guarda su propio estado de formulario (remember) porque solo esta
- * pantalla lo necesita. Al enviar, entrega los datos ya listos.
- */
 @Composable
 fun RegistroScreen(
     onVolver: () -> Unit,
-    onCrearCuenta: (nombre: String, telefono: String, direccion: String, referencia: String) -> Unit
+    onCrearCuentaExitoso: (nombre: String, telefono: String, direccion: String, referencia: String) -> Unit
 ) {
     var nombre by remember { mutableStateOf("") }
     var telefono by remember { mutableStateOf("") }
     var direccion by remember { mutableStateOf("") }
     var referencia by remember { mutableStateOf("") }
+
+    var errorNombre by remember { mutableStateOf(false) }
+    var errorTelefono by remember { mutableStateOf(false) }
+    var errorDireccion by remember { mutableStateOf(false) }
+    var errorReferencia by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
@@ -81,43 +64,92 @@ fun RegistroScreen(
 
         Spacer(Modifier.height(28.dp))
 
-        CampoTexto(
-            etiqueta = "Nombre completo",
-            valor = nombre,
-            onValorCambia = { nombre = it },
-            placeholder = "Juan Pérez"
-        )
-        Spacer(Modifier.height(16.dp))
-
-        CampoTexto(
-            etiqueta = "Teléfono",
-            valor = telefono,
-            onValorCambia = { telefono = it },
-            placeholder = "987 654 321",
-            teclado = KeyboardType.Phone
-        )
-        Spacer(Modifier.height(16.dp))
-
-        CampoTexto(
-            etiqueta = "Dirección de entrega",
-            valor = direccion,
-            onValorCambia = { direccion = it },
-            placeholder = "Av. Los Olivos 123"
-        )
-        Spacer(Modifier.height(16.dp))
-
-        CampoTexto(
-            etiqueta = "Referencia",
-            valor = referencia,
-            onValorCambia = { referencia = it },
-            placeholder = "Frente al parque"
+        OutlinedTextField(
+            value = nombre,
+            onValueChange = {
+                nombre = it
+                errorNombre = false
+            },
+            label = { Text("Nombre completo") },
+            placeholder = { Text("Juan Pérez") },
+            isError = errorNombre,
+            supportingText = { if (errorNombre) Text("Este campo es obligatorio") },
+            shape = RoundedCornerShape(12.dp),
+            modifier = Modifier.fillMaxWidth(),
+            singleLine = true
         )
 
-        Spacer(Modifier.height(28.dp))
+        Spacer(Modifier.height(8.dp))
+
+        OutlinedTextField(
+            value = telefono,
+            onValueChange = {
+                telefono = it
+                errorTelefono = false
+            },
+            label = { Text("Teléfono") },
+            placeholder = { Text("987 654 321") },
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
+            isError = errorTelefono,
+            supportingText = { if (errorTelefono) Text("Este campo es obligatorio") },
+            shape = RoundedCornerShape(12.dp),
+            modifier = Modifier.fillMaxWidth(),
+            singleLine = true
+        )
+
+        Spacer(Modifier.height(8.dp))
+
+        OutlinedTextField(
+            value = direccion,
+            onValueChange = {
+                direccion = it
+                errorDireccion = false
+            },
+            label = { Text("Dirección de entrega") },
+            placeholder = { Text("Av. Los Olivos 123") },
+            isError = errorDireccion,
+            supportingText = { if (errorDireccion) Text("Este campo es obligatorio") },
+            shape = RoundedCornerShape(12.dp),
+            modifier = Modifier.fillMaxWidth(),
+            singleLine = true
+        )
+
+        Spacer(Modifier.height(8.dp))
+
+        OutlinedTextField(
+            value = referencia,
+            onValueChange = {
+                referencia = it
+                errorReferencia = false
+            },
+            label = { Text("Referencia") },
+            placeholder = { Text("Frente al parque") },
+            isError = errorReferencia,
+            supportingText = { if (errorReferencia) Text("Este campo es obligatorio") },
+            shape = RoundedCornerShape(12.dp),
+            modifier = Modifier.fillMaxWidth(),
+            singleLine = true
+        )
+
+        Spacer(Modifier.height(24.dp))
 
         BotonPrimario(
             texto = "Crear cuenta",
-            onClick = { onCrearCuenta(nombre, telefono, direccion, referencia) }
+            onClick = {
+                val eNom = nombre.isBlank()
+                val eTel = telefono.isBlank()
+                val eDir = direccion.isBlank()
+                val eRef = referencia.isBlank()
+
+                errorNombre = eNom
+                errorTelefono = eTel
+                errorDireccion = eDir
+                errorReferencia = eRef
+
+                if (!eNom && !eTel && !eDir && !eRef) {
+                    onCrearCuentaExitoso(nombre, telefono, direccion, referencia)
+                }
+            }
         )
 
         Spacer(Modifier.height(24.dp))
@@ -133,35 +165,15 @@ private fun EncabezadoRegistro(onVolver: () -> Unit) {
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Center
     ) {
-        IconButton(
-            onClick = onVolver,
-            modifier = Modifier.align(Alignment.CenterVertically)
-        ) {
+        IconButton(onClick = onVolver) {
             Icon(Icons.Default.ArrowBack, contentDescription = "Volver")
         }
         Text(
             text = "Crear cuenta",
             style = MaterialTheme.typography.titleLarge,
+            fontWeight = FontWeight.Bold,
             modifier = Modifier.weight(1f, fill = false)
         )
-        Spacer(Modifier.size(48.dp)) // balancea el ancho del ícono de la izquierda
-    }
-    Text(
-        text = "Completa tus datos para continuar",
-        style = MaterialTheme.typography.bodySmall,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
-        modifier = Modifier.fillMaxWidth(),
-        textAlign = androidx.compose.ui.text.style.TextAlign.Center
-    )
-}
-
-@Preview(showBackground = true, showSystemUi = true)
-@Composable
-private fun RegistroPreview() {
-    BodegaTheme {
-        RegistroScreen(onVolver = {}, onCrearCuenta = { _, _, _, _ -> })
+        Spacer(Modifier.size(48.dp))
     }
 }
-
-
-
