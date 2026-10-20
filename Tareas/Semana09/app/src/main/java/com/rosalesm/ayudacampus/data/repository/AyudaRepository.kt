@@ -43,6 +43,7 @@ interface AyudaRepository {
     suspend fun agregarComentario(ticketId: Int, autor: Usuario, texto: String)
 
     // Panel
+    fun observarPromedioResolucion(): Flow<Double?>
     fun observarCantidadPorEstado(estado: EstadoTicket): Flow<Int>
     fun observarCantidadPorCategoria(): Flow<List<ConteoCategoria>>
     fun observarAltasSinAtender(limite: Long): Flow<Int>

@@ -11,6 +11,7 @@ import com.rosalesm.ayudacampus.ui.components.graficos.*
 import com.rosalesm.ayudacampus.viewmodel.PanelViewModel
 @Composable
 fun PanelScreen(vm: PanelViewModel,onVerTicketsPrioridadAlta: () -> Unit) {
+    val promedio by vm.promedioResolucion.collectAsState()
     val abiertos by vm.abiertos.collectAsState(); val proceso by vm.enProceso.collectAsState(); val resueltos by vm.resueltos.collectAsState()
     val estados by vm.datosGraficoEstado.collectAsState(); val categorias by vm.datosGraficoCategoria.collectAsState(); val alerta by vm.altasSinAtender.collectAsState()
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(20.dp),verticalArrangement=Arrangement.spacedBy(16.dp)) {
@@ -22,6 +23,11 @@ fun PanelScreen(vm: PanelViewModel,onVerTicketsPrioridadAlta: () -> Unit) {
                 }
             }
         }
+        Card { Column(Modifier.fillMaxWidth().padding(16.dp)) {
+            Text("Tiempo promedio de resolución",style=MaterialTheme.typography.titleMedium)
+            Text(promedio,style=MaterialTheme.typography.headlineSmall,color=MaterialTheme.colorScheme.primary)
+            Text("Desde la creación hasta el cierre confirmado por el estudiante",style=MaterialTheme.typography.bodySmall)
+        } }
         if(alerta>0) Card(colors=CardDefaults.cardColors(containerColor=MaterialTheme.colorScheme.errorContainer)) { Column(Modifier.padding(16.dp)) {
             Text("$alerta tickets ALTA sin atender por más de 1 hora")
             TextButton(onClick=onVerTicketsPrioridadAlta) { Text("Ver") }

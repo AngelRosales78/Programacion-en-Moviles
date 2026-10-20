@@ -33,6 +33,10 @@ class PanelViewModel(
     val cerrados: StateFlow<Int> = repository.observarCantidadPorEstado(EstadoTicket.CERRADO)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)
 
+    val promedioResolucion: StateFlow<String> = repository.observarPromedioResolucion()
+        .map { millis -> millis?.let { formatearDuracion(it.toLong()) } ?: "Sin tickets cerrados" }
+        .stateIn(viewModelScope,SharingStarted.WhileSubscribed(5000),"Sin tickets cerrados")
+
     // Datos procesados para el GraficoDona de tickets por estado
     val datosGraficoEstado: StateFlow<List<DatoGrafico>> = combine(
         abiertos, enProceso, resueltos, cerrados
@@ -58,4 +62,12 @@ class PanelViewModel(
         while(true) { emit(System.currentTimeMillis()-3_600_000L); delay(60_000L) }
     }.flatMapLatest { repository.observarAltasSinAtender(it) }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)
+}
+internal fun formatearDuracion(millis: Long): String {
+    val minutos=millis.coerceAtLeast(0)/60_000L
+    return when {
+        millis < 60_000L -> "Menos de 1 min"
+        minutos < 60 -> "$minutos min"
+        else -> "${minutos/60} h ${minutos%60} min"
+    }
 }

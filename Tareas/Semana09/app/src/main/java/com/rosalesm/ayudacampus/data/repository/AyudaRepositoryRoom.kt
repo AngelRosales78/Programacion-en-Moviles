@@ -116,6 +116,8 @@ class AyudaRepositoryRoom(
         ticketDao.insertarComentario(nuevoComentario)
     }
 
+    override fun observarPromedioResolucion(): Flow<Double?> = ticketDao.observarPromedioResolucion()
+
     // --- PANEL DE SOPORTE ---
     override fun observarCantidadPorEstado(estado: EstadoTicket): Flow<Int> {
         return ticketDao.contarPorEstado(estado.name)

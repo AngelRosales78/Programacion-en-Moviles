@@ -9,6 +9,9 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface TicketDao {
+    @Query("SELECT AVG(fechaCierre - fecha) FROM tickets WHERE estado = 'CERRADO' AND fechaCierre IS NOT NULL AND fechaCierre >= fecha")
+    fun observarPromedioResolucion(): Flow<Double?>
+
     @Query("SELECT COUNT(*) FROM tickets WHERE categoriaId = :id")
     suspend fun contarCategoria(id: Int): Int
 

@@ -70,6 +70,7 @@ class FakeRepo(alumno: Usuario) : AyudaRepository {
     override suspend fun cerrarConCalificacion(ticketId:Int,calificacion:Int) { cierres++; detalle.value=detalle.value!!.copy(ticket=detalle.value!!.ticket.copy(estado="CERRADO",calificacion=calificacion,fechaCierre=100L)) }
     override suspend fun reabrir(ticketId:Int) { detalle.value=detalle.value!!.copy(ticket=detalle.value!!.ticket.copy(estado="ABIERTO",calificacion=null,fechaCierre=null)) }
     override suspend fun agregarComentario(ticketId:Int,autor:Usuario,texto:String) { comentarios++ }
+    override fun observarPromedioResolucion()=flowOf<Double?>(null)
     override fun observarCantidadPorEstado(estado:EstadoTicket)=flowOf(0)
     override fun observarCantidadPorCategoria()=flowOf(emptyList<ConteoCategoria>())
     override fun observarAltasSinAtender(limite:Long)=flowOf(0)
