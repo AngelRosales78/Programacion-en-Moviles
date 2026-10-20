@@ -32,7 +32,7 @@ fun MainClienteScreen(usuario: Usuario,sesionVm: SesionViewModel,factory: AyudaV
     }) { padding -> Box(Modifier.padding(padding)) {
         when(tab) {
             0 -> MisTicketsScreen(mis,usuario.nombre,onNuevoTicketClick={ tab=1 },onTicketClick={ detalleId=it })
-            1 -> NuevoTicketScreen(nuevo,onVolver={ tab=0 },onTicketEnviado={ tab=0 })
+            1 -> NuevoTicketScreen(nuevo,onVolver={ tab=0 },onTicketEnviado={ if(tab==1) tab=0 })
             else -> PerfilScreen(sesionVm,mis)
         }
     } }

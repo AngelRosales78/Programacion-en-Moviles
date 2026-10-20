@@ -5,6 +5,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.rosalesm.ayudacampus.ui.components.*
 import com.rosalesm.ayudacampus.ui.components.graficos.*
@@ -17,8 +18,8 @@ fun PanelScreen(vm: PanelViewModel,onVerTicketsPrioridadAlta: () -> Unit) {
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(20.dp),verticalArrangement=Arrangement.spacedBy(16.dp)) {
         Cabecera("Panel de soporte","Mesa de ayuda TI · Vista general")
         Row(horizontalArrangement=Arrangement.spacedBy(8.dp)) {
-            listOf("Abiertos" to abiertos,"En proceso" to proceso,"Resueltos" to resueltos).forEach { (nombre,valor) ->
-                Card(Modifier.weight(1f),colors=CardDefaults.cardColors(containerColor=MaterialTheme.colorScheme.primaryContainer)) {
+            listOf(Triple("Abiertos",abiertos,Color(0xFFD97706)),Triple("En proceso",proceso,Color(0xFF2563EB)),Triple("Resueltos",resueltos,Color(0xFF16A34A))).forEach { (nombre,valor,color) ->
+                Card(Modifier.weight(1f),colors=CardDefaults.cardColors(containerColor=color.copy(alpha=0.12f),contentColor=color)) {
                     Column(Modifier.padding(10.dp)) { Text("$valor",style=MaterialTheme.typography.headlineMedium); Text(nombre,style=MaterialTheme.typography.labelMedium) }
                 }
             }

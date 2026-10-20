@@ -192,17 +192,7 @@ fun LoginScreen(
                 modifier = Modifier.fillMaxWidth()
             )
 
-            Text(
-                text = "¿Olvidaste tu contraseña?",
-                color = colorRol,
-                fontSize = 13.sp,
-                fontWeight = FontWeight.SemiBold,
-                textAlign = TextAlign.End,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 8.dp, bottom = 24.dp)
-                    .clickable { }
-            )
+            Spacer(modifier = Modifier.height(24.dp))
 
             if (error != null) {
                 Text(

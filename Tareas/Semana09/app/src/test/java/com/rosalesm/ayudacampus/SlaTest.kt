@@ -6,6 +6,7 @@ import org.junit.Test
 class SlaTest {
     private fun t(p:String="ALTA",e:String="ABIERTO")=Ticket(1,1,1,"Equipo roto","No funciona","Lab",p,e,0L)
     @Test fun `limites por prioridad y vencimiento exacto`() {
+        assertEquals("SLA restante · 4 h 0 min",calcularSla(t().copy(fecha=1000L),0L).texto)
         assertFalse(calcularSla(t(),4*3_600_000L-1).vencido)
         assertTrue(calcularSla(t(),4*3_600_000L).vencido)
         assertFalse(calcularSla(t("MEDIA"),24*3_600_000L-1).vencido)
