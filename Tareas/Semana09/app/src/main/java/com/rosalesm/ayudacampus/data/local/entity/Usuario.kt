@@ -9,5 +9,5 @@ data class Usuario(
     val nombre: String,
     val correo: String,
     val clave: String,
-    val rol: String // Guardar como String: Rol.CLIENTE.name | Rol.ADMIN.name
+    val rol: String // Se guarda la propiedad Rol.name ("CLIENTE" o "ADMIN")
 )

@@ -1,2 +1,54 @@
 package com.rosalesm.ayudacampus.viewmodel
 
+import androidx.compose.ui.graphics.Color
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.rosalesm.ayudacampus.data.repository.AyudaRepository
+import com.rosalesm.ayudacampus.model.EstadoTicket
+import com.rosalesm.ayudacampus.ui.components.graficos.DatoGrafico
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
+
+class PanelViewModel(
+    private val repository: AyudaRepository
+) : ViewModel() {
+
+    val abiertos: StateFlow<Int> = repository.observarCantidadPorEstado(EstadoTicket.ABIERTO)
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)
+
+    val enProceso: StateFlow<Int> = repository.observarCantidadPorEstado(EstadoTicket.EN_PROCESO)
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)
+
+    val resueltos: StateFlow<Int> = repository.observarCantidadPorEstado(EstadoTicket.RESUELTO)
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)
+
+    val cerrados: StateFlow<Int> = repository.observarCantidadPorEstado(EstadoTicket.CERRADO)
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)
+
+    // Datos procesados para el GraficoDona de tickets por estado
+    val datosGraficoEstado: StateFlow<List<DatoGrafico>> = combine(
+        abiertos, enProceso, resueltos, cerrados
+    ) { ab, en, re, ce ->
+        listOf(
+            DatoGrafico("Abierto", ab.toFloat(), Color(0xFFD97706)),
+            DatoGrafico("En proceso", en.toFloat(), Color(0xFF2563EB)),
+            DatoGrafico("Resuelto", re.toFloat(), Color(0xFF16A34A)),
+            DatoGrafico("Cerrado", ce.toFloat(), Color(0xFF6B7280))
+        )
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    // Datos procesados para el GraficoBarras por categoría
+    val datosGraficoCategoria: StateFlow<List<DatoGrafico>> = repository.observarCantidadPorCategoria()
+        .map { lista ->
+            lista.map { item ->
+                DatoGrafico(item.nombreCategoria, item.cantidad.toFloat(), Color(0xFF7C3AED))
+            }
+        }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    // Alerta de tickets de prioridad ALTA sin atender por más de 1 hora
+    val altasSinAtender: StateFlow<Int> = repository.observarAltasSinAtender(System.currentTimeMillis() - 3600000L)
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)
+}

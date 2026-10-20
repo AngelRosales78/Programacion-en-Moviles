@@ -2,27 +2,23 @@ package com.rosalesm.ayudacampus.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.rosalesm.ayudacampus.data.local.entity.Usuario
 import com.rosalesm.ayudacampus.data.prefs.PreferenciasStore
 import com.rosalesm.ayudacampus.data.repository.AyudaRepository
 import com.rosalesm.ayudacampus.model.Rol
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-
-data class UsuarioEstado(
-    val nombre: String,
-    val correo: String,
-    val clave: String,
-    val rol: Rol
-)
 
 class SesionViewModel(
     private val repository: AyudaRepository,
     private val preferenciasStore: PreferenciasStore
 ) : ViewModel() {
 
-    private val _sesion = MutableStateFlow<UsuarioEstado?>(null)
-    val sesion: StateFlow<UsuarioEstado?> = _sesion
+    private val _sesion = MutableStateFlow<Usuario?>(null)
+    val sesion: StateFlow<Usuario?> = _sesion
 
     private val _error = MutableStateFlow<String?>(null)
     val error: StateFlow<String?> = _error
@@ -30,33 +26,16 @@ class SesionViewModel(
     private val _cargando = MutableStateFlow(false)
     val cargando: StateFlow<Boolean> = _cargando
 
-    private val _esModoOscuro = MutableStateFlow(false)
-    val esModoOscuro: StateFlow<Boolean> = _esModoOscuro
-
-    // Lista en memoria de usuarios registrados (incluyendo la cuenta de prueba)
-    private val usuariosRegistrados = mutableListOf(
-        UsuarioEstado("prueba", "prueba@prueba.com", "1234", Rol.CLIENTE),
-        UsuarioEstado("Juan Pérez", "juan@campus.test", "1234", Rol.CLIENTE),
-        UsuarioEstado("Soporte TI", "soporte@campus.test", "admin", Rol.ADMIN)
+    // Se observa el modo oscuro guardado en DataStore
+    val esModoOscuro: StateFlow<Boolean> = preferenciasStore.modoOscuro.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = false
     )
 
     fun cambiarModoOscuro(activado: Boolean) {
-        _esModoOscuro.value = activado
-    }
-
-    fun registrarUsuario(
-        nombre: String,
-        correo: String,
-        clave: String,
-        rol: Rol,
-        onExito: () -> Unit
-    ) {
         viewModelScope.launch {
-            _cargando.value = true
-            val nuevoUsuario = UsuarioEstado(nombre, correo, clave, rol)
-            usuariosRegistrados.add(nuevoUsuario)
-            _cargando.value = false
-            onExito()
+            preferenciasStore.guardarModoOscuro(activado)
         }
     }
 
@@ -66,21 +45,36 @@ class SesionViewModel(
         rol: Rol,
         onExito: (Rol) -> Unit
     ) {
+        if (correo.isBlank() || clave.isBlank()) {
+            _error.value = "Ingresa el correo y la contraseña"
+            return
+        }
+
         viewModelScope.launch {
             _cargando.value = true
-            val encontrado = usuariosRegistrados.find {
-                it.correo.equals(correo, ignoreCase = true) && it.clave == clave && it.rol == rol
-            }
+            val usuario = repository.login(correo, clave)
 
-            if (encontrado != null) {
-                _sesion.value = encontrado
-                _error.value = null
-                _cargando.value = false
-                onExito(encontrado.rol)
+            if (usuario != null) {
+                if (usuario.rol != rol.name) {
+                    _error.value = "El usuario no corresponde al rol seleccionado"
+                } else {
+                    _sesion.value = usuario
+                    _error.value = null
+                    preferenciasStore.guardarSesion(usuario.rol, usuario.id)
+                    onExito(rol)
+                }
             } else {
-                _cargando.value = false
                 _error.value = "Credenciales incorrectas"
             }
+            _cargando.value = false
+        }
+    }
+
+    fun cerrarSesion(onCerrado: () -> Unit) {
+        viewModelScope.launch {
+            preferenciasStore.cerrarSesion()
+            _sesion.value = null
+            onCerrado()
         }
     }
 

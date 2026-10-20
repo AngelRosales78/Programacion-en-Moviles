@@ -21,10 +21,7 @@ import androidx.room.PrimaryKey
             onDelete = ForeignKey.CASCADE
         )
     ],
-    indices = [
-        Index("clienteId"),
-        Index("categoriaId")
-    ]
+    indices = [Index("clienteId"), Index("categoriaId")]
 )
 data class Ticket(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,
@@ -33,8 +30,8 @@ data class Ticket(
     val titulo: String,
     val descripcion: String,
     val ubicacion: String,
-    val prioridad: String, // BAJA | MEDIA | ALTA
-    val estado: String,   // ABIERTO | EN_PROCESO | RESUELTO | CERRADO
+    val prioridad: String, // Prioridad.name ("BAJA", "MEDIA", "ALTA")
+    val estado: String,   // EstadoTicket.name ("ABIERTO", "EN_PROCESO", "RESUELTO", "CERRADO")
     val fecha: Long = System.currentTimeMillis(),
     val fechaCierre: Long? = null,
     val calificacion: Int? = null

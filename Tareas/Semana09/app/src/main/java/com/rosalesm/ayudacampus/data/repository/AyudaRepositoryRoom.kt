@@ -19,24 +19,22 @@ class AyudaRepositoryRoom(
     private val ticketDao: TicketDao
 ) : AyudaRepository {
 
-    // --- Usuarios ---
+    // --- USUARIOS ---
     override suspend fun login(correo: String, clave: String): Usuario? {
         return usuarioDao.login(correo, clave)
     }
 
-    // --- Categorías ---
-    override fun observarCategorias(): Flow<List<Categoria>> =
-        categoriaDao.observarTodas()
+    // --- CATEGORÍAS ---
+    override fun observarCategorias(): Flow<List<Categoria>> {
+        return categoriaDao.observarTodas()
+    }
 
-    override fun observarCategoriasActivas(): Flow<List<Categoria>> =
-        categoriaDao.observarActivas()
+    override fun observarCategoriasActivas(): Flow<List<Categoria>> {
+        return categoriaDao.observarActivas()
+    }
 
     override suspend fun guardarCategoria(c: Categoria) {
-        if (c.id == 0) {
-            categoriaDao.insertar(c)
-        } else {
-            categoriaDao.actualizar(c)
-        }
+        categoriaDao.insertar(c)
     }
 
     override suspend fun eliminarCategoria(c: Categoria) {
@@ -47,7 +45,7 @@ class AyudaRepositoryRoom(
         categoriaDao.cambiarActiva(id, activa)
     }
 
-    // --- Tickets ---
+    // --- TICKETS ---
     override suspend fun crearTicket(
         clienteId: Int,
         categoriaId: Int,
@@ -69,14 +67,17 @@ class AyudaRepositoryRoom(
         return ticketDao.insertarTicket(nuevoTicket)
     }
 
-    override fun observarTicketsCliente(clienteId: Int): Flow<List<TicketConDetalle>> =
-        ticketDao.observarPorCliente(clienteId)
+    override fun observarTicketsCliente(clienteId: Int): Flow<List<TicketConDetalle>> {
+        return ticketDao.observarPorCliente(clienteId)
+    }
 
-    override fun observarTodosLosTickets(): Flow<List<TicketConDetalle>> =
-        ticketDao.observarTodos()
+    override fun observarTodosLosTickets(): Flow<List<TicketConDetalle>> {
+        return ticketDao.observarTodos()
+    }
 
-    override fun observarTicket(id: Int): Flow<TicketConDetalle?> =
-        ticketDao.observarUno(id)
+    override fun observarTicket(id: Int): Flow<TicketConDetalle?> {
+        return ticketDao.observarUno(id)
+    }
 
     override suspend fun cambiarEstado(ticketId: Int, estado: EstadoTicket) {
         ticketDao.actualizarEstado(ticketId, estado.name)
@@ -106,13 +107,16 @@ class AyudaRepositoryRoom(
         ticketDao.insertarComentario(nuevoComentario)
     }
 
-    // --- Panel ---
-    override fun observarCantidadPorEstado(estado: EstadoTicket): Flow<Int> =
-        ticketDao.contarPorEstado(estado.name)
+    // --- PANEL DE SOPORTE ---
+    override fun observarCantidadPorEstado(estado: EstadoTicket): Flow<Int> {
+        return ticketDao.contarPorEstado(estado.name)
+    }
 
-    override fun observarCantidadPorCategoria(): Flow<List<ConteoCategoria>> =
-        ticketDao.contarPorCategoria()
+    override fun observarCantidadPorCategoria(): Flow<List<ConteoCategoria>> {
+        return ticketDao.contarPorCategoria()
+    }
 
-    override fun observarAltasSinAtender(limite: Long): Flow<Int> =
-        ticketDao.contarAltasSinAtender(limite)
+    override fun observarAltasSinAtender(limite: Long): Flow<Int> {
+        return ticketDao.contarAltasSinAtender(limite)
+    }
 }
