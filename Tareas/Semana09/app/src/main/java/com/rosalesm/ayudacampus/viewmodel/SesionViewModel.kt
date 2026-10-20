@@ -4,57 +4,83 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rosalesm.ayudacampus.data.prefs.PreferenciasStore
 import com.rosalesm.ayudacampus.data.repository.AyudaRepository
-import com.rosalesm.ayudacampus.data.local.entity.Usuario
 import com.rosalesm.ayudacampus.model.Rol
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
+data class UsuarioEstado(
+    val nombre: String,
+    val correo: String,
+    val clave: String,
+    val rol: Rol
+)
+
 class SesionViewModel(
-    private val repo: AyudaRepository,
-    private val prefs: PreferenciasStore
+    private val repository: AyudaRepository,
+    private val preferenciasStore: PreferenciasStore
 ) : ViewModel() {
 
-    private val _usuarioActual = MutableStateFlow<Usuario?>(null)
-    val usuarioActual: StateFlow<Usuario?> = _usuarioActual.asStateFlow()
+    private val _sesion = MutableStateFlow<UsuarioEstado?>(null)
+    val sesion: StateFlow<UsuarioEstado?> = _sesion
 
     private val _error = MutableStateFlow<String?>(null)
-    val error: StateFlow<String?> = _error.asStateFlow()
+    val error: StateFlow<String?> = _error
 
     private val _cargando = MutableStateFlow(false)
-    val cargando: StateFlow<Boolean> = _cargando.asStateFlow()
+    val cargando: StateFlow<Boolean> = _cargando
 
-    val modoOscuro: StateFlow<Boolean> = prefs.modoOscuro
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
+    private val _esModoOscuro = MutableStateFlow(false)
+    val esModoOscuro: StateFlow<Boolean> = _esModoOscuro
 
-    val perfilActivo: StateFlow<String> = prefs.perfilActivo
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "")
+    // Lista en memoria de usuarios registrados (incluyendo la cuenta de prueba)
+    private val usuariosRegistrados = mutableListOf(
+        UsuarioEstado("prueba", "prueba@prueba.com", "1234", Rol.CLIENTE),
+        UsuarioEstado("Juan Pérez", "juan@campus.test", "1234", Rol.CLIENTE),
+        UsuarioEstado("Soporte TI", "soporte@campus.test", "admin", Rol.ADMIN)
+    )
 
-    fun login(correo: String, clave: String, rolSeleccionado: Rol, onSuccess: (Rol) -> Unit) {
-        if (correo.isBlank() || clave.isBlank()) {
-            _error.value = "Ingresa el correo y la contraseña"
-            return
-        }
+    fun cambiarModoOscuro(activado: Boolean) {
+        _esModoOscuro.value = activado
+    }
 
+    fun registrarUsuario(
+        nombre: String,
+        correo: String,
+        clave: String,
+        rol: Rol,
+        onExito: () -> Unit
+    ) {
         viewModelScope.launch {
             _cargando.value = true
-            _error.value = null
-
-            val usuario = repo.login(correo.trim(), clave.trim())
-
-            if (usuario == null) {
-                _error.value = "Correo o contraseña incorrectos"
-            } else if (usuario.rol != rolSeleccionado.name) {
-                _error.value = "El usuario no corresponde al rol de ${if (rolSeleccionado == Rol.CLIENTE) "Estudiante" else "Soporte TI"}"
-            } else {
-                _usuarioActual.value = usuario
-                prefs.guardarSesion(usuario.rol, usuario.id)
-                onSuccess(rolSeleccionado)
-            }
+            val nuevoUsuario = UsuarioEstado(nombre, correo, clave, rol)
+            usuariosRegistrados.add(nuevoUsuario)
             _cargando.value = false
+            onExito()
+        }
+    }
+
+    fun login(
+        correo: String,
+        clave: String,
+        rol: Rol,
+        onExito: (Rol) -> Unit
+    ) {
+        viewModelScope.launch {
+            _cargando.value = true
+            val encontrado = usuariosRegistrados.find {
+                it.correo.equals(correo, ignoreCase = true) && it.clave == clave && it.rol == rol
+            }
+
+            if (encontrado != null) {
+                _sesion.value = encontrado
+                _error.value = null
+                _cargando.value = false
+                onExito(encontrado.rol)
+            } else {
+                _cargando.value = false
+                _error.value = "Credenciales incorrectas"
+            }
         }
     }
 

@@ -7,12 +7,16 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Email
 import androidx.compose.material.icons.outlined.Lock
+import androidx.compose.material.icons.outlined.Visibility
+import androidx.compose.material.icons.outlined.VisibilityOff
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -23,10 +27,12 @@ import com.rosalesm.ayudacampus.viewmodel.SesionViewModel
 @Composable
 fun LoginScreen(
     vm: SesionViewModel,
-    onLoginExitoso: (Rol) -> Unit
+    onLoginExitoso: (Rol) -> Unit,
+    onIrARegistro: () -> Unit = {}
 ) {
-    var correo by remember { mutableStateOf("juan@campus.test") }
-    var clave by remember { mutableStateOf("1234") }
+    var correo by remember { mutableStateOf("") }
+    var clave by remember { mutableStateOf("") }
+    var verClave by remember { mutableStateOf(false) }
     var rolSeleccionado by remember { mutableStateOf(Rol.CLIENTE) }
 
     val error by vm.error.collectAsState()
@@ -38,7 +44,7 @@ fun LoginScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFFFAF8FF))
+            .background(MaterialTheme.colorScheme.background)
             .padding(horizontal = 24.dp, vertical = 16.dp),
         verticalArrangement = Arrangement.SpaceBetween
     ) {
@@ -53,12 +59,12 @@ fun LoginScreen(
                 style = MaterialTheme.typography.headlineLarge.copy(
                     fontWeight = FontWeight.Bold,
                     fontSize = 30.sp,
-                    color = Color(0xFF1E293B)
+                    color = MaterialTheme.colorScheme.onBackground
                 )
             )
             Text(
                 text = "Ingresa para continuar",
-                color = Color(0xFF64748B),
+                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f),
                 fontSize = 15.sp,
                 modifier = Modifier.padding(bottom = 24.dp)
             )
@@ -69,7 +75,7 @@ fun LoginScreen(
                     .fillMaxWidth()
                     .height(48.dp)
                     .background(
-                        color = Color(0xFFF1F5F9),
+                        color = MaterialTheme.colorScheme.surfaceVariant,
                         shape = RoundedCornerShape(24.dp)
                     )
                     .padding(4.dp),
@@ -78,16 +84,16 @@ fun LoginScreen(
                 Button(
                     onClick = {
                         rolSeleccionado = Rol.CLIENTE
-                        if (correo == "soporte@campus.test") {
-                            correo = "juan@campus.test"
-                            clave = "1234"
-                        }
+                        correo = ""
+                        clave = ""
                         vm.limpiarError()
                     },
-                    modifier = Modifier.weight(1f).fillMaxHeight(),
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxHeight(),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = if (rolSeleccionado == Rol.CLIENTE) Color(0xFF0891B2) else Color.Transparent,
-                        contentColor = if (rolSeleccionado == Rol.CLIENTE) Color.White else Color(0xFF64748B)
+                        contentColor = if (rolSeleccionado == Rol.CLIENTE) Color.White else MaterialTheme.colorScheme.onSurfaceVariant
                     ),
                     shape = RoundedCornerShape(20.dp),
                     contentPadding = PaddingValues(0.dp)
@@ -98,16 +104,16 @@ fun LoginScreen(
                 Button(
                     onClick = {
                         rolSeleccionado = Rol.ADMIN
-                        if (correo == "juan@campus.test") {
-                            correo = "soporte@campus.test"
-                            clave = "admin"
-                        }
+                        correo = ""
+                        clave = ""
                         vm.limpiarError()
                     },
-                    modifier = Modifier.weight(1f).fillMaxHeight(),
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxHeight(),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = if (rolSeleccionado == Rol.ADMIN) Color(0xFF7C3AED) else Color.Transparent,
-                        contentColor = if (rolSeleccionado == Rol.ADMIN) Color.White else Color(0xFF64748B)
+                        contentColor = if (rolSeleccionado == Rol.ADMIN) Color.White else MaterialTheme.colorScheme.onSurfaceVariant
                     ),
                     shape = RoundedCornerShape(20.dp),
                     contentPadding = PaddingValues(0.dp)
@@ -137,16 +143,18 @@ fun LoginScreen(
                 shape = RoundedCornerShape(12.dp),
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedBorderColor = colorRol,
-                    unfocusedBorderColor = Color(0xFFE2E8F0),
-                    focusedContainerColor = Color.White,
-                    unfocusedContainerColor = Color.White
+                    unfocusedBorderColor = MaterialTheme.colorScheme.outline,
+                    focusedContainerColor = MaterialTheme.colorScheme.surface,
+                    unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+                    focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                    unfocusedTextColor = MaterialTheme.colorScheme.onSurface
                 ),
                 modifier = Modifier.fillMaxWidth()
             )
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Campo Contraseña
+            // Campo Contraseña con Visibilidad (Ojo)
             OutlinedTextField(
                 value = clave,
                 onValueChange = {
@@ -161,13 +169,25 @@ fun LoginScreen(
                         tint = colorRol
                     )
                 },
+                trailingIcon = {
+                    IconButton(onClick = { verClave = !verClave }) {
+                        Icon(
+                            imageVector = if (verClave) Icons.Outlined.Visibility else Icons.Outlined.VisibilityOff,
+                            contentDescription = "Mostrar contraseña",
+                            tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                        )
+                    }
+                },
+                visualTransformation = if (verClave) VisualTransformation.None else PasswordVisualTransformation(),
                 singleLine = true,
                 shape = RoundedCornerShape(12.dp),
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedBorderColor = colorRol,
-                    unfocusedBorderColor = Color(0xFFE2E8F0),
-                    focusedContainerColor = Color.White,
-                    unfocusedContainerColor = Color.White
+                    unfocusedBorderColor = MaterialTheme.colorScheme.outline,
+                    focusedContainerColor = MaterialTheme.colorScheme.surface,
+                    unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+                    focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                    unfocusedTextColor = MaterialTheme.colorScheme.onSurface
                 ),
                 modifier = Modifier.fillMaxWidth()
             )
@@ -208,15 +228,16 @@ fun LoginScreen(
             if (rolSeleccionado == Rol.CLIENTE) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.Center
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text("¿No tienes cuenta? ", color = Color(0xFF64748B), fontSize = 14.sp)
+                    Text("¿No tienes cuenta? ", color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f), fontSize = 14.sp)
                     Text(
                         text = "Regístrate",
                         color = colorRol,
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Bold,
-                        modifier = Modifier.clickable { }
+                        modifier = Modifier.clickable { onIrARegistro() }
                     )
                 }
             }
