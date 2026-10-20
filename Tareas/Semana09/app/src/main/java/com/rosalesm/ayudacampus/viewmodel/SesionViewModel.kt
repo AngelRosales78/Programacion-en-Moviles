@@ -6,79 +6,72 @@ import com.rosalesm.ayudacampus.data.local.entity.Usuario
 import com.rosalesm.ayudacampus.data.prefs.PreferenciasStore
 import com.rosalesm.ayudacampus.data.repository.AyudaRepository
 import com.rosalesm.ayudacampus.model.Rol
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
-class SesionViewModel(
-    private val repository: AyudaRepository,
-    private val preferenciasStore: PreferenciasStore
-) : ViewModel() {
-
+class SesionViewModel(private val repository: AyudaRepository, private val prefs: PreferenciasStore) : ViewModel() {
     private val _sesion = MutableStateFlow<Usuario?>(null)
-    val sesion: StateFlow<Usuario?> = _sesion
-
-    private val _error = MutableStateFlow<String?>(null)
-    val error: StateFlow<String?> = _error
-
-    private val _cargando = MutableStateFlow(false)
-    val cargando: StateFlow<Boolean> = _cargando
-
-    // Se observa el modo oscuro guardado en DataStore
-    val esModoOscuro: StateFlow<Boolean> = preferenciasStore.modoOscuro.stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(5000),
-        initialValue = false
-    )
-
-    fun cambiarModoOscuro(activado: Boolean) {
+    val sesion = _sesion.asStateFlow()
+    val error = MutableStateFlow<String?>(null)
+    val cargando = MutableStateFlow(false)
+    val lista = MutableStateFlow(false)
+    private var estudianteId: Int? = null
+    val esModoOscuro = prefs.modoOscuro.stateIn(viewModelScope, SharingStarted.Eagerly, false)
+    val notificaciones = prefs.notificaciones.stateIn(viewModelScope, SharingStarted.Eagerly, true)
+    val recibirTickets = prefs.recibirTickets.stateIn(viewModelScope, SharingStarted.Eagerly, true)
+    init {
         viewModelScope.launch {
-            preferenciasStore.guardarModoOscuro(activado)
+            try {
+                val id = prefs.usuarioId.first()
+                val rol = prefs.perfilActivo.first()
+                _sesion.value = repository.obtenerUsuario(id)?.takeIf { it.rol == rol }
+                if (_sesion.value?.rol == Rol.CLIENTE.name) estudianteId = id
+            } catch (e: Exception) { error.value = "No se pudo restaurar la sesión" }
+            finally { lista.value = true }
         }
     }
-
-    fun login(
-        correo: String,
-        clave: String,
-        rol: Rol,
-        onExito: (Rol) -> Unit
-    ) {
-        if (correo.isBlank() || clave.isBlank()) {
-            _error.value = "Ingresa el correo y la contraseña"
-            return
-        }
-
+    private fun ejecutar(accion: suspend () -> Unit) {
+        if (cargando.value) return
         viewModelScope.launch {
-            _cargando.value = true
-            val usuario = repository.login(correo, clave)
-
-            if (usuario != null) {
-                if (usuario.rol != rol.name) {
-                    _error.value = "El usuario no corresponde al rol seleccionado"
-                } else {
-                    _sesion.value = usuario
-                    _error.value = null
-                    preferenciasStore.guardarSesion(usuario.rol, usuario.id)
-                    onExito(rol)
-                }
-            } else {
-                _error.value = "Credenciales incorrectas"
-            }
-            _cargando.value = false
+            cargando.value = true
+            try { error.value = null; accion() }
+            catch (e: Exception) { error.value = e.message ?: "No se pudo completar la operación" }
+            finally { cargando.value = false }
         }
     }
-
-    fun cerrarSesion(onCerrado: () -> Unit) {
-        viewModelScope.launch {
-            preferenciasStore.cerrarSesion()
-            _sesion.value = null
-            onCerrado()
-        }
+    fun login(correo: String, clave: String, rol: Rol, onExito: (Rol) -> Unit) = ejecutar {
+        require(correo.isNotBlank() && clave.isNotBlank()) { "Ingresa el correo y la contraseña" }
+        val usuario = repository.login(correo.trim(), clave)
+        requireNotNull(usuario) { "Correo o contraseña incorrectos" }
+        require(usuario.rol == rol.name) { "El usuario no corresponde al rol seleccionado" }
+        prefs.guardarSesion(usuario.rol, usuario.id)
+        _sesion.value = usuario
+        if (rol == Rol.CLIENTE) estudianteId = usuario.id
+        onExito(rol)
     }
-
-    fun limpiarError() {
-        _error.value = null
+    fun registrarUsuario(nombre: String, correo: String, clave: String, rol: Rol, onExito: () -> Unit) = ejecutar {
+        require(nombre.trim().length >= 2) { "Ingresa un nombre válido" }
+        require(Regex("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$").matches(correo.trim())) { "Ingresa un correo válido" }
+        require(clave.length >= 4) { "La contraseña debe tener al menos 4 caracteres" }
+        require(rol == Rol.CLIENTE) { "Solo se permite registrar estudiantes" }
+        repository.registrarUsuario(Usuario(nombre=nombre.trim(),correo=correo.trim().lowercase(),clave=clave,rol=rol.name))
+        onExito()
     }
+    fun cambiarPerfil() = ejecutar {
+        val actual = _sesion.value ?: return@ejecutar
+        val destino = if (actual.rol == Rol.CLIENTE.name) {
+            estudianteId = actual.id
+            repository.obtenerUsuarioPorRol(Rol.ADMIN.name)
+        } else estudianteId?.let { repository.obtenerUsuario(it) } ?: repository.obtenerUsuarioPorRol(Rol.CLIENTE.name)
+        requireNotNull(destino) { "No existe un usuario de prueba para ese perfil" }
+        prefs.guardarSesion(destino.rol, destino.id)
+        _sesion.value = destino
+    }
+    fun cerrarSesion(onCerrado: () -> Unit = {}) = ejecutar {
+        prefs.cerrarSesion(); _sesion.value = null; estudianteId = null; onCerrado()
+    }
+    fun cambiarModoOscuro(b: Boolean) { viewModelScope.launch { prefs.guardarModoOscuro(b) } }
+    fun cambiarNotificaciones(b: Boolean) { viewModelScope.launch { prefs.guardarNotificaciones(b) } }
+    fun cambiarRecibirTickets(b: Boolean) { viewModelScope.launch { prefs.guardarRecibirTickets(b) } }
+    fun limpiarError() { error.value = null }
 }

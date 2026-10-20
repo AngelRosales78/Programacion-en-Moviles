@@ -2,8 +2,9 @@ package com.rosalesm.ayudacampus.data.local.entity
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import androidx.room.Index
 
-@Entity(tableName = "usuarios")
+@Entity(tableName = "usuarios", indices = [Index(value = ["correo"], unique = true)])
 data class Usuario(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,
     val nombre: String,

@@ -19,6 +19,14 @@ class AyudaRepositoryRoom(
     private val ticketDao: TicketDao
 ) : AyudaRepository {
 
+    override suspend fun obtenerUsuario(id: Int) = usuarioDao.obtener(id)
+    override suspend fun obtenerUsuarioPorRol(rol: String) = usuarioDao.obtenerPorRol(rol)
+    override suspend fun registrarUsuario(usuario: Usuario) {
+        require(usuarioDao.buscarCorreo(usuario.correo) == null) { "Este correo ya está registrado" }
+        usuarioDao.insertar(usuario)
+    }
+    override suspend fun categoriaTieneTickets(id: Int) = ticketDao.contarCategoria(id) > 0
+
     // --- USUARIOS ---
     override suspend fun login(correo: String, clave: String): Usuario? {
         return usuarioDao.login(correo, clave)
@@ -34,10 +42,11 @@ class AyudaRepositoryRoom(
     }
 
     override suspend fun guardarCategoria(c: Categoria) {
-        categoriaDao.insertar(c)
+        if (c.id == 0) categoriaDao.insertar(c) else categoriaDao.actualizar(c)
     }
 
     override suspend fun eliminarCategoria(c: Categoria) {
+        require(!categoriaTieneTickets(c.id)) { "No se puede eliminar una categoría con tickets" }
         categoriaDao.eliminar(c)
     }
 

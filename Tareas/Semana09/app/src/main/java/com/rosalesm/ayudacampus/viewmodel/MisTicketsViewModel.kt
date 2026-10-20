@@ -11,6 +11,8 @@ class MisTicketsViewModel(
     val clienteId: Int
 ) : ViewModel() {
 
+    val todos = repository.observarTicketsCliente(clienteId)
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
     private val _busqueda = MutableStateFlow("")
     val busqueda: StateFlow<String> = _busqueda
 

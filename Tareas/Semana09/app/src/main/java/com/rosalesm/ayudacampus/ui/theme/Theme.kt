@@ -1,41 +1,23 @@
 package com.rosalesm.ayudacampus.ui.theme
 
-import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.lightColorScheme
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
-
-// Tema Claro
-private val LightColorScheme = lightColorScheme(
-    primary = Color(0xFF00838F),
-    background = Color(0xFFFAF8FF),
-    surface = Color(0xFFFFFFFF),
-    onBackground = Color(0xFF1E293B), // Letras en tema claro (Casi negro/Oscuro)
-    onSurface = Color(0xFF1E293B)      // Letras sobre tarjetas/superficies
-)
-
-// Tema Oscuro
-private val DarkColorScheme = darkColorScheme(
-    primary = Color(0xFF00838F),
-    background = Color(0xFF121212),
-    surface = Color(0xFF1E1E1E),
-    onBackground = Color(0xFFFFFFFF), // Letras en tema oscuro (Blanco)
-    onSurface = Color(0xFFFFFFFF)      // Letras sobre tarjetas (Blanco)
-)
+import com.rosalesm.ayudacampus.model.Rol
 
 @Composable
-fun AyudaCampusTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
-    content: @Composable () -> Unit
-) {
-    val colorScheme = if (darkTheme) DarkColorScheme else LightColorScheme
-
-    MaterialTheme(
-        colorScheme = colorScheme,
-        typography = Typography,
-        content = content
+fun AyudaCampusTheme(darkTheme: Boolean=isSystemInDarkTheme(),rol: Rol=Rol.CLIENTE,content: @Composable () -> Unit) {
+    val soporte=rol==Rol.ADMIN
+    val scheme=if(darkTheme) darkColorScheme(
+        primary=if(soporte) Color(0xFFC4B5FD) else Color(0xFF67E8F9),
+        primaryContainer=if(soporte) Color(0xFF4C1D95) else Color(0xFF164E63),
+        background=Color(0xFF10151E),surface=Color(0xFF1A2230)
+    ) else lightColorScheme(
+        primary=if(soporte) Color(0xFF7C3AED) else Color(0xFF0891B2),
+        primaryContainer=if(soporte) Color(0xFFEDE4FF) else Color(0xFFCFFAFE),
+        background=if(soporte) Color(0xFFFAF8FF) else Color(0xFFF7FDFE),surface=Color.White,
+        onBackground=Color(0xFF1E293B),onSurface=Color(0xFF1E293B)
     )
+    MaterialTheme(colorScheme=scheme,typography=Typography,content=content)
 }

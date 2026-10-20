@@ -1,136 +1,39 @@
 package com.rosalesm.ayudacampus.ui.cliente
-
-import androidx.compose.foundation.layout.padding
+import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.AddBox
-import androidx.compose.material.icons.outlined.Menu
-import androidx.compose.material.icons.outlined.Person
+import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import com.rosalesm.ayudacampus.viewmodel.MisTicketsViewModel
-import com.rosalesm.ayudacampus.viewmodel.NuevoTicketViewModel
-import com.rosalesm.ayudacampus.viewmodel.SesionViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.rosalesm.ayudacampus.data.local.entity.Usuario
+import com.rosalesm.ayudacampus.viewmodel.*
 
 @Composable
-fun MainClienteScreen(
-    misTicketsVm: MisTicketsViewModel,
-    nuevoTicketVm: NuevoTicketViewModel,
-    sesionVm: SesionViewModel,
-    onCerrarSesion: () -> Unit
-) {
-    var pestañaSeleccionada by remember { mutableStateOf(0) }
-    var ticketSeleccionadoId by remember { mutableStateOf<String?>(null) }
-
-    val sesionEstado by sesionVm.sesion.collectAsState()
-    val esModoOscuro by sesionVm.esModoOscuro.collectAsState()
-    val tickets by misTicketsVm.tickets.collectAsState()
-
-    val colorActivo = Color(0xFF00838F)
-    val colorInactivo = Color(0xFF94A3B8)
-
-    val ticketActual = tickets.find { it.id == ticketSeleccionadoId }
-
-    if (ticketActual != null) {
-        DetalleTicketScreen(
-            ticket = ticketActual,
-            onVolver = { ticketSeleccionadoId = null },
-            onEnviarComentario = { texto ->
-                misTicketsVm.agregarComentario(ticketActual.id, texto)
-            },
-            onCalificar = { _, _ ->
-                ticketSeleccionadoId = null
-            }
-        )
-    } else {
-        Scaffold(
-            bottomBar = {
-                NavigationBar(
-                    containerColor = MaterialTheme.colorScheme.surface,
-                    tonalElevation = 8.dp
-                ) {
-                    NavigationBarItem(
-                        selected = pestañaSeleccionada == 0,
-                        onClick = { pestañaSeleccionada = 0 },
-                        icon = { Icon(Icons.Outlined.Menu, contentDescription = null) },
-                        label = { Text("Tickets", fontSize = 11.sp) },
-                        colors = NavigationBarItemDefaults.colors(
-                            selectedIconColor = colorActivo,
-                            selectedTextColor = colorActivo,
-                            unselectedIconColor = colorInactivo,
-                            unselectedTextColor = colorInactivo,
-                            indicatorColor = Color(0xFFE0F7FA)
-                        )
-                    )
-
-                    NavigationBarItem(
-                        selected = pestañaSeleccionada == 1,
-                        onClick = { pestañaSeleccionada = 1 },
-                        icon = { Icon(Icons.Outlined.AddBox, contentDescription = null) },
-                        label = { Text("Nuevo", fontSize = 11.sp) },
-                        colors = NavigationBarItemDefaults.colors(
-                            selectedIconColor = colorActivo,
-                            selectedTextColor = colorActivo,
-                            unselectedIconColor = colorInactivo,
-                            unselectedTextColor = colorInactivo,
-                            indicatorColor = Color(0xFFE0F7FA)
-                        )
-                    )
-
-                    NavigationBarItem(
-                        selected = pestañaSeleccionada == 2,
-                        onClick = { pestañaSeleccionada = 2 },
-                        icon = { Icon(Icons.Outlined.Person, contentDescription = null) },
-                        label = { Text("Perfil", fontSize = 11.sp) },
-                        colors = NavigationBarItemDefaults.colors(
-                            selectedIconColor = colorActivo,
-                            selectedTextColor = colorActivo,
-                            unselectedIconColor = colorInactivo,
-                            unselectedTextColor = colorInactivo,
-                            indicatorColor = Color(0xFFE0F7FA)
-                        )
-                    )
-                }
-            }
-        ) { innerPadding ->
-            Surface(
-                modifier = Modifier.padding(innerPadding),
-                color = MaterialTheme.colorScheme.background
-            ) {
-                when (pestañaSeleccionada) {
-                    0 -> MisTicketsScreen(
-                        vm = misTicketsVm,
-                        nombreUsuario = sesionEstado?.nombre ?: "Usuario",
-                        onNuevoTicketClick = { pestañaSeleccionada = 1 },
-                        onTicketClick = { id -> ticketSeleccionadoId = id }
-                    )
-                    1 -> NuevoTicketScreen(
-                        vm = nuevoTicketVm,
-                        onVolver = { pestañaSeleccionada = 0 },
-                        onTicketEnviado = {
-                            misTicketsVm.agregarTicket(
-                                titulo = nuevoTicketVm.titulo.value,
-                                ubicacion = nuevoTicketVm.ubicacion.value,
-                                prioridad = nuevoTicketVm.prioridad.value,
-                                categoria = nuevoTicketVm.categoria.value
-                            )
-                            pestañaSeleccionada = 0
-                        }
-                    )
-                    2 -> PerfilScreen(
-                        nombre = sesionEstado?.nombre ?: "Usuario",
-                        correo = sesionEstado?.correo ?: "usuario@campus.test",
-                        esModoOscuro = esModoOscuro,
-                        onModoOscuroChange = { activado ->
-                            sesionVm.cambiarModoOscuro(activado)
-                        },
-                        onCerrarSesion = onCerrarSesion
-                    )
-                }
+fun MainClienteScreen(usuario: Usuario,sesionVm: SesionViewModel,factory: AyudaViewModelFactory) {
+    var tab by rememberSaveable { mutableIntStateOf(0) }
+    var detalleId by rememberSaveable { mutableStateOf<Int?>(null) }
+    val f=remember(usuario.id) { factory.paraUsuario(usuario) }
+    val mis: MisTicketsViewModel=viewModel(key="mis-${usuario.id}",factory=f)
+    val nuevo: NuevoTicketViewModel=viewModel(key="nuevo-${usuario.id}",factory=f)
+    BackHandler(detalleId!=null || tab!=0) { if(detalleId!=null) detalleId=null else tab=0 }
+    if(detalleId!=null) {
+        val id=detalleId!!
+        val vm: TicketDetalleViewModel=viewModel(key="detalle-${usuario.id}-$id",factory=factory.paraUsuario(usuario,id))
+        DetalleTicketScreen(vm) { detalleId=null }
+    } else Scaffold(bottomBar={
+        NavigationBar {
+            listOf("Tickets" to Icons.Outlined.ConfirmationNumber,"Nuevo" to Icons.Outlined.AddBox,"Perfil" to Icons.Outlined.Person).forEachIndexed { i,(nombre,icono) ->
+                NavigationBarItem(selected=tab==i,onClick={ tab=i },icon={ Icon(icono,null) },label={ Text(nombre) })
             }
         }
-    }
+    }) { padding -> Box(Modifier.padding(padding)) {
+        when(tab) {
+            0 -> MisTicketsScreen(mis,usuario.nombre,onNuevoTicketClick={ tab=1 },onTicketClick={ detalleId=it })
+            1 -> NuevoTicketScreen(nuevo,onVolver={ tab=0 },onTicketEnviado={ tab=0 })
+            else -> PerfilScreen(sesionVm,mis)
+        }
+    } }
 }

@@ -5,6 +5,15 @@ import com.rosalesm.ayudacampus.data.local.entity.Usuario
 
 @Dao
 interface UsuarioDao {
+    @Query("SELECT * FROM usuarios WHERE id = :id LIMIT 1")
+    suspend fun obtener(id: Int): Usuario?
+    @Query("SELECT * FROM usuarios WHERE rol = :rol ORDER BY id LIMIT 1")
+    suspend fun obtenerPorRol(rol: String): Usuario?
+    @Query("SELECT * FROM usuarios WHERE LOWER(correo) = LOWER(:correo) LIMIT 1")
+    suspend fun buscarCorreo(correo: String): Usuario?
+    @Insert
+    suspend fun insertar(usuario: Usuario): Long
+
     @Query("SELECT * FROM usuarios WHERE LOWER(correo) = LOWER(:correo) AND clave = :clave LIMIT 1")
     suspend fun login(correo: String, clave: String): Usuario?
 

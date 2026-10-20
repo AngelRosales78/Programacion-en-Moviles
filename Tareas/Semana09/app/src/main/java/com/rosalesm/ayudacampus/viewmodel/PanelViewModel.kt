@@ -6,12 +6,17 @@ import androidx.lifecycle.viewModelScope
 import com.rosalesm.ayudacampus.data.repository.AyudaRepository
 import com.rosalesm.ayudacampus.model.EstadoTicket
 import com.rosalesm.ayudacampus.ui.components.graficos.DatoGrafico
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class PanelViewModel(
     private val repository: AyudaRepository
 ) : ViewModel() {
@@ -49,6 +54,8 @@ class PanelViewModel(
         }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     // Alerta de tickets de prioridad ALTA sin atender por más de 1 hora
-    val altasSinAtender: StateFlow<Int> = repository.observarAltasSinAtender(System.currentTimeMillis() - 3600000L)
+    val altasSinAtender: StateFlow<Int> = flow {
+        while(true) { emit(System.currentTimeMillis()-3_600_000L); delay(60_000L) }
+    }.flatMapLatest { repository.observarAltasSinAtender(it) }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)
 }

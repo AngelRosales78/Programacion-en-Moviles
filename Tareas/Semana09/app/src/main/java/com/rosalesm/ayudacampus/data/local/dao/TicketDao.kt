@@ -9,6 +9,9 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface TicketDao {
+    @Query("SELECT COUNT(*) FROM tickets WHERE categoriaId = :id")
+    suspend fun contarCategoria(id: Int): Int
+
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertarTicket(t: Ticket): Long

@@ -9,6 +9,7 @@ import com.rosalesm.ayudacampus.data.repository.AyudaRepositoryRoom
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 
 class AyudaApp : Application() {
 
@@ -31,7 +32,7 @@ class AyudaApp : Application() {
         )
         preferenciasStore = PreferenciasStore(this)
 
-        CoroutineScope(Dispatchers.IO).launch {
+        runBlocking(Dispatchers.IO) {
             DatosIniciales.sembrar(database)
         }
     }

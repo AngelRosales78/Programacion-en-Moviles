@@ -1,114 +1,32 @@
 package com.rosalesm.ayudacampus.data.local
 
-import com.rosalesm.ayudacampus.data.local.entity.Categoria
-import com.rosalesm.ayudacampus.data.local.entity.Comentario
-import com.rosalesm.ayudacampus.data.local.entity.Ticket
-import com.rosalesm.ayudacampus.data.local.entity.Usuario
-import com.rosalesm.ayudacampus.model.Rol
+import androidx.room.withTransaction
+import com.rosalesm.ayudacampus.data.local.entity.*
 
 object DatosIniciales {
-
-    suspend fun sembrar(db: AyudaDatabase) {
-        val usuarioDao = db.usuarioDao()
-        val categoriaDao = db.categoriaDao()
-        val ticketDao = db.ticketDao()
-
-        // Solo se siembra si no hay usuarios registrados
-        if (usuarioDao.contar() == 0) {
-            // 1. Insertar Usuarios
-            val usuarioCliente = Usuario(
-                nombre = "prueba",
-                correo = "prueba@prueba.com",
-                clave = "1234",
-                rol = Rol.CLIENTE.name
-            )
-            val usuarioJuan = Usuario(
-                nombre = "Juan Pérez",
-                correo = "juan@campus.test",
-                clave = "1234",
-                rol = Rol.CLIENTE.name
-            )
-            val usuarioSoporte = Usuario(
-                nombre = "Soporte TI",
-                correo = "soporte@campus.test",
-                clave = "admin",
-                rol = Rol.ADMIN.name
-            )
-            usuarioDao.insertarTodas(listOf(usuarioCliente, usuarioJuan, usuarioSoporte))
-
-            // 2. Insertar Categorías
-            val categorias = listOf(
-                Categoria(id = 1, nombre = "Hardware", icono = "pc", activa = true),
-                Categoria(id = 2, nombre = "Software", icono = "code", activa = true),
-                Categoria(id = 3, nombre = "Red / Wi-Fi", icono = "wifi", activa = true),
-                Categoria(id = 4, nombre = "Cuenta", icono = "key", activa = true),
-                Categoria(id = 5, nombre = "Impresión", icono = "printer", activa = false)
-            )
-            categoriaDao.insertarTodas(categorias)
-
-            // 3. Insertar Tickets de Ejemplo
-            val ahora = System.currentTimeMillis()
-            val horaMillis = 3600000L
-
-            val t1 = Ticket(
-                id = 1,
-                clienteId = 1,
-                categoriaId = 3,
-                titulo = "Sin Wi-Fi en el laboratorio 3",
-                descripcion = "Desde ayer no hay señal de Wi-Fi en todo el laboratorio. Afecta a 30 alumnos.",
-                ubicacion = "Lab 3 - Pabellón B",
-                prioridad = "ALTA",
-                estado = "EN_PROCESO",
-                fecha = ahora - (2 * horaMillis)
-            )
-
-            val t2 = Ticket(
-                id = 2,
-                clienteId = 1,
-                categoriaId = 1,
-                titulo = "Servidor del aula 305 caído",
-                descripcion = "El servidor principal del aula no enciende y no se pueden realizar las prácticas.",
-                ubicacion = "Aula 305",
-                prioridad = "ALTA",
-                estado = "ABIERTO",
-                fecha = ahora - (3 * horaMillis) // Más de 1 hora para activar la alerta del panel
-            )
-
-            val t3 = Ticket(
-                id = 3,
-                clienteId = 2,
-                categoriaId = 2,
-                titulo = "Instalar Android Studio",
-                descripcion = "Requiero la instalación de la versión más reciente en la PC 12.",
-                ubicacion = "Lab 1",
-                prioridad = "MEDIA",
-                estado = "ABIERTO",
-                fecha = ahora - (5 * horaMillis)
-            )
-
-            ticketDao.insertarTicket(t1)
-            ticketDao.insertarTicket(t2)
-            ticketDao.insertarTicket(t3)
-
-            // 4. Insertar Comentarios de Ejemplo
-            val c1 = Comentario(
-                ticketId = 1,
-                autorId = 1,
-                autorNombre = "prueba",
-                autorRol = "CLIENTE",
-                texto = "Gracias, quedo atento.",
-                fecha = ahora - horaMillis
-            )
-            val c2 = Comentario(
-                ticketId = 1,
-                autorId = 3,
-                autorNombre = "Soporte TI",
-                autorRol = "ADMIN",
-                texto = "Reiniciamos el equipo. ¿Ya tienes señal?",
-                fecha = ahora - (30 * 60000L)
-            )
-            ticketDao.insertarComentario(c1)
-            ticketDao.insertarComentario(c2)
-        }
+    suspend fun sembrar(db: AyudaDatabase) = db.withTransaction {
+        if (db.usuarioDao().contar() != 0) return@withTransaction
+        db.usuarioDao().insertarTodas(listOf(
+            Usuario(1, "Juan Pérez", "juan@campus.test", "1234", "CLIENTE"),
+            Usuario(2, "Soporte TI", "soporte@campus.test", "admin", "ADMIN")
+        ))
+        db.categoriaDao().insertarTodas(listOf(
+            Categoria(1, "Hardware", "pc"), Categoria(2, "Software", "code"),
+            Categoria(3, "Red / Wi-Fi", "wifi"), Categoria(4, "Cuenta", "key"),
+            Categoria(5, "Impresión", "printer")
+        ))
+        val ahora = System.currentTimeMillis()
+        val hora = 3_600_000L
+        val ejemplos = listOf(
+            Ticket(1,1,3,"Sin Wi-Fi en el laboratorio 3","Desde ayer no hay señal en el laboratorio.","Lab 3 · Pabellón B","ALTA","EN_PROCESO",ahora-2*hora),
+            Ticket(2,1,1,"Equipo del aula 305 no enciende","El equipo principal no permite realizar las prácticas.","Aula 305","ALTA","ABIERTO",ahora-3*hora),
+            Ticket(3,1,2,"Instalar Android Studio","Necesito Android Studio en la PC 12.","Lab 1","MEDIA","ABIERTO",ahora-5*hora),
+            Ticket(4,1,4,"Recuperar acceso a la cuenta","No puedo ingresar al correo institucional.","Biblioteca","MEDIA","RESUELTO",ahora-26*hora),
+            Ticket(5,1,5,"Impresora no reconoce papel","La impresora muestra un aviso sin papel.","Biblioteca","BAJA","CERRADO",ahora-48*hora,ahora-24*hora,4),
+            Ticket(6,1,1,"Mouse del equipo 8 no responde","El puntero no se mueve aunque esté conectado.","Lab 2","BAJA","ABIERTO",ahora-hora)
+        )
+        ejemplos.forEach { db.ticketDao().insertarTicket(it) }
+        db.ticketDao().insertarComentario(Comentario(ticketId=1,autorId=1,autorNombre="Juan Pérez",autorRol="CLIENTE",texto="Gracias, quedo atento.",fecha=ahora-hora))
+        db.ticketDao().insertarComentario(Comentario(ticketId=1,autorId=2,autorNombre="Soporte TI",autorRol="ADMIN",texto="Reiniciamos el equipo. ¿Ya tienes señal?",fecha=ahora-1_800_000))
     }
 }

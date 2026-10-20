@@ -1,85 +1,29 @@
 package com.rosalesm.ayudacampus.ui.navigation
-
-import androidx.compose.runtime.Composable
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
+import androidx.navigation.compose.*
 import com.rosalesm.ayudacampus.model.Rol
 import com.rosalesm.ayudacampus.ui.cliente.*
 import com.rosalesm.ayudacampus.ui.soporte.MainSoporteScreen
-import com.rosalesm.ayudacampus.viewmodel.AyudaViewModelFactory
-import com.rosalesm.ayudacampus.viewmodel.MisTicketsViewModel
-import com.rosalesm.ayudacampus.viewmodel.NuevoTicketViewModel
-import com.rosalesm.ayudacampus.viewmodel.SesionViewModel
-
+import com.rosalesm.ayudacampus.viewmodel.*
 @Composable
-fun NavAyuda(
-    navController: NavHostController,
-    sesionViewModel: SesionViewModel,
-    factory: AyudaViewModelFactory
-) {
-    NavHost(
-        navController = navController,
-        startDestination = Ruta.Splash.path
-    ) {
-        composable(Ruta.Splash.path) {
-            SplashScreen(
-                onComenzarClick = { navController.navigate(Ruta.Registro.path) },
-                onYaTengoCuentaClick = { navController.navigate(Ruta.Login.path) }
-            )
-        }
-
-        composable(Ruta.Login.path) {
-            LoginScreen(
-                vm = sesionViewModel,
-                onLoginExitoso = { rol ->
-                    val destino = if (rol == Rol.ADMIN) "main_soporte" else Ruta.Main.path
-                    navController.navigate(destino) {
-                        popUpTo(Ruta.Login.path) { inclusive = true }
-                    }
-                },
-                onIrARegistro = { navController.navigate(Ruta.Registro.path) }
-            )
-        }
-
-        composable(Ruta.Registro.path) {
-            RegistroScreen(
-                vm = sesionViewModel,
-                onRegistroCompletado = {
-                    navController.navigate(Ruta.Login.path) {
-                        popUpTo(Ruta.Registro.path) { inclusive = true }
-                    }
-                },
-                onIrALogin = { navController.navigate(Ruta.Login.path) }
-            )
-        }
-
-        composable(Ruta.Main.path) {
-            val misTicketsVm: MisTicketsViewModel = viewModel(factory = factory)
-            val nuevoTicketVm: NuevoTicketViewModel = viewModel(factory = factory)
-
-            MainClienteScreen(
-                misTicketsVm = misTicketsVm,
-                nuevoTicketVm = nuevoTicketVm,
-                sesionVm = sesionViewModel,
-                onCerrarSesion = {
-                    navController.navigate(Ruta.Login.path) {
-                        popUpTo(0) { inclusive = true }
-                    }
-                }
-            )
-        }
-
-        composable("main_soporte") {
-            MainSoporteScreen(
-                sesionVm = sesionViewModel,
-                onCerrarSesion = {
-                    navController.navigate(Ruta.Login.path) {
-                        popUpTo(0) { inclusive = true }
-                    }
-                }
-            )
+fun NavAyuda(navController: NavHostController,sesionViewModel: SesionViewModel,factory: AyudaViewModelFactory) {
+    val lista by sesionViewModel.lista.collectAsState()
+    val usuario by sesionViewModel.sesion.collectAsState()
+    if(!lista) { Box(Modifier.fillMaxSize(),contentAlignment=Alignment.Center) { CircularProgressIndicator() }; return }
+    val u=usuario
+    if(u!=null) key(u.id,u.rol) {
+        if(u.rol==Rol.ADMIN.name) MainSoporteScreen(u,sesionViewModel,factory)
+        else MainClienteScreen(u,sesionViewModel,factory)
+    } else key("sin-sesion") {
+        NavHost(navController,startDestination="splash") {
+            composable("splash") { SplashScreen(onComenzarClick={ navController.navigate("registro") },onYaTengoCuentaClick={ navController.navigate("login") }) }
+            composable("login") { LoginScreen(sesionViewModel,onLoginExitoso={},onIrARegistro={ sesionViewModel.limpiarError(); navController.navigate("registro") }) }
+            composable("registro") { RegistroScreen(sesionViewModel,onRegistroCompletado={ navController.navigate("login") { popUpTo("splash") } },onIrALogin={ sesionViewModel.limpiarError(); navController.navigate("login") { popUpTo("splash") } }) }
         }
     }
 }
