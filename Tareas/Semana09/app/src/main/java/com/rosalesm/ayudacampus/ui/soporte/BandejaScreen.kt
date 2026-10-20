@@ -12,6 +12,7 @@ import com.rosalesm.ayudacampus.ui.components.*
 import com.rosalesm.ayudacampus.viewmodel.BandejaViewModel
 @Composable
 fun BandejaScreen(vm: BandejaViewModel,onTicketClick: (Int) -> Unit) {
+    val sla by vm.sla.collectAsState()
     val tickets by vm.tickets.collectAsState(); val estado by vm.filtroEstado.collectAsState()
     LazyColumn(Modifier.fillMaxSize().padding(horizontal=20.dp),verticalArrangement=Arrangement.spacedBy(10.dp),contentPadding=PaddingValues(bottom=24.dp)) {
         item { Cabecera("Bandeja de tickets","Ordenados por prioridad y fecha") }
@@ -19,6 +20,6 @@ fun BandejaScreen(vm: BandejaViewModel,onTicketClick: (Int) -> Unit) {
             listOf("Todos","Abiertos","En proceso","Resueltos").forEach { f -> FilterChip(selected=estado==f,onClick={ vm.filtroEstado.value=f },label={ Text(f) }) }
         } }
         if(tickets.isEmpty()) item { Text("No hay tickets con estos filtros") }
-        items(tickets,key={ it.ticket.id }) { t -> TicketCard(t,mostrarCliente=true,onClick={ onTicketClick(t.ticket.id) }) }
+        items(tickets,key={ it.ticket.id }) { t -> TicketCard(t,sla=sla[t.ticket.id],mostrarCliente=true,onClick={ onTicketClick(t.ticket.id) }) }
     }
 }

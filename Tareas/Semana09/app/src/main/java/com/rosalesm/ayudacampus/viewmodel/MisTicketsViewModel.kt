@@ -9,7 +9,7 @@ import kotlinx.coroutines.flow.*
 class MisTicketsViewModel(
     private val repository: AyudaRepository,
     val clienteId: Int
-) : ViewModel() {
+) : RelojTicketsViewModel() {
 
     val todos = repository.observarTicketsCliente(clienteId)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
@@ -43,4 +43,5 @@ class MisTicketsViewModel(
 
     fun onBusquedaChange(nuevoTexto: String) { _busqueda.value = nuevoTexto }
     fun onFiltroChange(nuevoFiltro: String) { _filtroSeleccionado.value = nuevoFiltro }
+    val sla = observarSla(tickets)
 }

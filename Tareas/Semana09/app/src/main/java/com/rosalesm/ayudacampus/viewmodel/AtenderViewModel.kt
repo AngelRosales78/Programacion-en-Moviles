@@ -8,7 +8,7 @@ import com.rosalesm.ayudacampus.model.*
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
-class AtenderViewModel(private val repo: AyudaRepository, private val ticketId: Int, val usuario: Usuario) : ViewModel() {
+class AtenderViewModel(private val repo: AyudaRepository, private val ticketId: Int, val usuario: Usuario) : RelojTicketsViewModel() {
     val ticket=repo.observarTicket(ticketId).stateIn(viewModelScope,SharingStarted.WhileSubscribed(5000),null)
     val estado=MutableStateFlow<EstadoTicket?>(null)
     val prioridad=MutableStateFlow<Prioridad?>(null)
@@ -37,4 +37,5 @@ class AtenderViewModel(private val repo: AyudaRepository, private val ticketId: 
         prioridad.value?.let { repo.cambiarPrioridad(ticketId,it) }
         estado.value=null; prioridad.value=null; onExito()
     }
+    val sla = observarSla(ticket.map { listOfNotNull(it) })
 }

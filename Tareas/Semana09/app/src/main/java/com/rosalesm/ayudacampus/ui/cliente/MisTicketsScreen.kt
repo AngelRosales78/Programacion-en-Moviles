@@ -14,6 +14,7 @@ import com.rosalesm.ayudacampus.ui.components.*
 import com.rosalesm.ayudacampus.viewmodel.MisTicketsViewModel
 @Composable
 fun MisTicketsScreen(vm: MisTicketsViewModel,nombreUsuario: String,onNuevoTicketClick: () -> Unit,onTicketClick: (Int) -> Unit) {
+    val sla by vm.sla.collectAsState()
     val tickets by vm.tickets.collectAsState()
     val todos by vm.todos.collectAsState()
     val texto by vm.busqueda.collectAsState()
@@ -26,7 +27,7 @@ fun MisTicketsScreen(vm: MisTicketsViewModel,nombreUsuario: String,onNuevoTicket
                 listOf("Todos","Abiertos","En proceso","Resueltos").forEach { f -> FilterChip(selected=f==filtro,onClick={ vm.onFiltroChange(f) },label={ Text(f) }) }
             } }
             if(tickets.isEmpty()) item { Text("No tienes tickets aquí",modifier=Modifier.padding(24.dp)) }
-            items(tickets,key={ it.ticket.id }) { t -> TicketCard(t,onClick={ onTicketClick(t.ticket.id) }) }
+            items(tickets,key={ it.ticket.id }) { t -> TicketCard(t,sla=sla[t.ticket.id],onClick={ onTicketClick(t.ticket.id) }) }
         }
     }
 }

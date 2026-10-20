@@ -7,7 +7,7 @@ import com.rosalesm.ayudacampus.data.repository.AyudaRepository
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
-class TicketDetalleViewModel(private val repository: AyudaRepository, val ticketId: Int, val usuarioActual: Usuario) : ViewModel() {
+class TicketDetalleViewModel(private val repository: AyudaRepository, val ticketId: Int, val usuarioActual: Usuario) : RelojTicketsViewModel() {
     val ticket = repository.observarTicket(ticketId).map { it?.takeIf { t -> t.ticket.clienteId == usuarioActual.id && usuarioActual.rol == "CLIENTE" } }
         .stateIn(viewModelScope,SharingStarted.WhileSubscribed(5000),null)
     val error = MutableStateFlow<String?>(null)
@@ -41,4 +41,5 @@ class TicketDetalleViewModel(private val repository: AyudaRepository, val ticket
         check(actual().ticket.estado == "RESUELTO") { "Solo puedes reabrir tickets resueltos" }
         repository.reabrir(ticketId)
     }
+    val sla = observarSla(ticket.map { listOfNotNull(it) })
 }

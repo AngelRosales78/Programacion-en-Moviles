@@ -23,10 +23,10 @@ fun iconoCategoria(icono: String): ImageVector = when(icono) {
 }
 fun colorPrioridad(p: String) = when(p) { "ALTA" -> Color(0xFFDC2626); "MEDIA" -> Color(0xFFB45309); else -> Color(0xFF6B7280) }
 @Composable
-fun TicketCard(detalle: TicketConDetalle,mostrarCliente: Boolean=false,onClick: () -> Unit) {
+fun TicketCard(detalle: TicketConDetalle,mostrarCliente: Boolean=false,sla: com.rosalesm.ayudacampus.model.EstadoSla?=null,onClick: () -> Unit) {
     Card(onClick=onClick,modifier=Modifier.fillMaxWidth()) {
         Row {
-            Box(Modifier.width(5.dp).height(142.dp).background(colorPrioridad(detalle.ticket.prioridad)))
+            Box(Modifier.width(5.dp).height(170.dp).background(colorPrioridad(detalle.ticket.prioridad)))
             Column(Modifier.padding(14.dp),verticalArrangement=Arrangement.spacedBy(7.dp)) {
                 Row(horizontalArrangement=Arrangement.spacedBy(8.dp)) {
                     Icon(iconoCategoria(detalle.categoria.icono),null,tint=MaterialTheme.colorScheme.primary)
@@ -34,6 +34,7 @@ fun TicketCard(detalle: TicketConDetalle,mostrarCliente: Boolean=false,onClick: 
                 }
                 Text(detalle.ticket.titulo,fontWeight=FontWeight.Bold)
                 Row(horizontalArrangement=Arrangement.spacedBy(8.dp)) { EstadoChip(detalle.ticket.estado); PrioridadChip(detalle.ticket.prioridad) }
+                SlaTexto(sla)
                 Text(if(mostrarCliente) "${detalle.cliente.nombre} · ${detalle.ticket.ubicacion}" else detalle.ticket.ubicacion,style=MaterialTheme.typography.bodySmall)
             }
         }

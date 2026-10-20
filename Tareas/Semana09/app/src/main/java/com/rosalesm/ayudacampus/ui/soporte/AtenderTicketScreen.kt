@@ -13,6 +13,7 @@ import com.rosalesm.ayudacampus.viewmodel.AtenderViewModel
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun AtenderTicketScreen(vm: AtenderViewModel,onVolver: () -> Unit) {
+    val sla by vm.sla.collectAsState()
     val detalle by vm.ticket.collectAsState(); val estado by vm.estado.collectAsState(); val prioridad by vm.prioridad.collectAsState()
     val error by vm.error.collectAsState(); val ocupado by vm.ocupado.collectAsState()
     var texto by rememberSaveable { mutableStateOf("") }
@@ -26,6 +27,7 @@ fun AtenderTicketScreen(vm: AtenderViewModel,onVolver: () -> Unit) {
                 Text("${d.cliente.nombre} · ${d.cliente.correo}")
                 Text("${d.categoria.nombre} · ${d.ticket.ubicacion}")
                 Text(d.ticket.descripcion)
+                SlaTexto(sla[d.ticket.id])
             } } }
             item { Text("Estado",style=MaterialTheme.typography.titleMedium)
                 FlowRow(horizontalArrangement=Arrangement.spacedBy(6.dp)) { EstadoTicket.entries.forEach { e ->

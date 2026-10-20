@@ -8,7 +8,7 @@ import kotlinx.coroutines.flow.*
 
 class BandejaViewModel(
     private val repository: AyudaRepository
-) : ViewModel() {
+) : RelojTicketsViewModel() {
 
     val filtroEstado = MutableStateFlow("Todos")
 
@@ -29,4 +29,5 @@ class BandejaViewModel(
         started = SharingStarted.WhileSubscribed(5000),
         initialValue = emptyList()
     )
+    val sla = observarSla(tickets)
 }

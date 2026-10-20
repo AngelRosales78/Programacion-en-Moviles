@@ -11,6 +11,7 @@ import com.rosalesm.ayudacampus.ui.components.*
 import com.rosalesm.ayudacampus.viewmodel.TicketDetalleViewModel
 @Composable
 fun DetalleTicketScreen(vm: TicketDetalleViewModel,onVolver: () -> Unit) {
+    val sla by vm.sla.collectAsState()
     val detalle by vm.ticket.collectAsState()
     val error by vm.error.collectAsState()
     val ocupado by vm.ocupado.collectAsState()
@@ -27,6 +28,7 @@ fun DetalleTicketScreen(vm: TicketDetalleViewModel,onVolver: () -> Unit) {
                 Row(horizontalArrangement=Arrangement.spacedBy(8.dp)) { EstadoChip(d.ticket.estado); PrioridadChip(d.ticket.prioridad) }
                 Text("${d.categoria.nombre} · ${d.ticket.ubicacion}")
                 Text(d.ticket.descripcion)
+                SlaTexto(sla[d.ticket.id])
             } } }
             item { StepperTicket(d.ticket.estado) }
             item { Text("Conversación",style=MaterialTheme.typography.titleMedium) }
