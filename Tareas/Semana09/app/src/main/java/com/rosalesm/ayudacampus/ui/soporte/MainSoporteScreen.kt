@@ -30,7 +30,7 @@ fun MainSoporteScreen(usuario: Usuario,sesionVm: SesionViewModel,factory: AyudaV
         }
     } }) { p -> Box(Modifier.padding(p)) {
         when(tab) {
-            0 -> PanelScreen(panel) { bandeja.filtroEstado.value="Abiertos"; tab=1 }
+            0 -> PanelScreen(panel) { bandeja.verAltasAbiertas(); tab=1 }
             1 -> BandejaScreen(bandeja) { detalleId=it }
             2 -> CategoriasScreen(categorias) { categoriaId=it }
             else -> AjustesScreen(sesionVm)
