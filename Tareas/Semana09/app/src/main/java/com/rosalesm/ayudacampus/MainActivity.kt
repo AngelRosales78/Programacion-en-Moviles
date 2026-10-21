@@ -27,7 +27,7 @@ class MainActivity : ComponentActivity() {
             val esModoOscuro by sesionViewModel.esModoOscuro.collectAsState()
             val usuario by sesionViewModel.sesion.collectAsState()
 
-            AyudaCampusTheme(darkTheme = esModoOscuro, rol = if(usuario?.rol == "ADMIN") com.rosalesm.ayudacampus.model.Rol.ADMIN else com.rosalesm.ayudacampus.model.Rol.CLIENTE) {
+            AyudaCampusTheme(darkTheme = esModoOscuro && usuario != null, rol = if(usuario?.rol == "ADMIN") com.rosalesm.ayudacampus.model.Rol.ADMIN else com.rosalesm.ayudacampus.model.Rol.CLIENTE) {
                 val navController = rememberNavController()
                 NavAyuda(
                     navController = navController,

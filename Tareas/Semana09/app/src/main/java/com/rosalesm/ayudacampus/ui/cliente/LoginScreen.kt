@@ -20,8 +20,8 @@ import com.rosalesm.ayudacampus.viewmodel.SesionViewModel
 fun LoginScreen(vm: SesionViewModel,onLoginExitoso: (Rol)->Unit,onIrARegistro: ()->Unit={}) {
     var correo by rememberSaveable { mutableStateOf("") }; var clave by rememberSaveable { mutableStateOf("") }
     var rol by rememberSaveable { mutableStateOf(Rol.CLIENTE) }
-    val error by vm.error.collectAsState(); val cargando by vm.cargando.collectAsState(); val oscuro by vm.esModoOscuro.collectAsState()
-    AyudaCampusTheme(darkTheme=oscuro,rol=rol) {
+    val error by vm.error.collectAsState(); val cargando by vm.cargando.collectAsState()
+    AyudaCampusTheme(darkTheme=false,rol=rol) {
         Surface(Modifier.fillMaxSize(),color=MaterialTheme.colorScheme.surface) {
             Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).systemBarsPadding().padding(24.dp),verticalArrangement=Arrangement.spacedBy(14.dp)) {
                 Spacer(Modifier.height(42.dp))
