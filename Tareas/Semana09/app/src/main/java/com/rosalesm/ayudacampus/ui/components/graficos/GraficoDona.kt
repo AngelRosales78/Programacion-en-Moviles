@@ -15,7 +15,7 @@ fun GraficoDona(datos: List<DatoGrafico>) {
     if(total==0f) { Text("Aún no hay tickets"); return }
     Row(horizontalArrangement=Arrangement.spacedBy(20.dp)) {
         Box(contentAlignment=Alignment.Center) {
-        Canvas(Modifier.size(132.dp).padding(14.dp)) {
+        Canvas(Modifier.size(112.dp).padding(14.dp)) {
             var inicio=-90f
             datos.forEach { d -> val angulo=d.valor/total*360f; drawArc(d.color,inicio,angulo,false,style=Stroke(25f)); inicio+=angulo }
         }

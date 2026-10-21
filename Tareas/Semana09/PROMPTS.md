@@ -61,3 +61,12 @@ Los resultados ejecutados y cualquier limitación están en [docs/PRUEBAS.md](do
 - Las relaciones Room deben proteger el historial; una eliminación en cascada mal elegida puede borrar tickets.
 - MVVM permite probar permisos y transiciones sin depender de la apariencia de los botones.
 - El código generado necesita compilarse y probarse; las capturas y el registro de resultados deben reflejar lo realmente ejecutado.
+
+
+## Ajuste de interfaz solicitado con cuatro imágenes de referencia
+
+**Solicitud del estudiante:** adaptar las pantallas de estudiante y soporte al diseño proporcionado; usar los datos reales del registro en Perfil; permitir ver la contraseña durante el registro; agregar las cuentas prueba@prueba.com y soporte@soporte.com con clave 1234 y nombres prueba y soporte.
+
+**Implementación con IA:** componentes compactos reutilizables, colores por rol, navegación inferior, formularios, conversaciones, gráficos y categorías. Identidad vinculada a la sesión real; botones independientes de visibilidad para ambas contraseñas. Incorporación idempotente de las cuentas sobre bases nuevas y existentes, conservando identificadores e historial. Se mantienen las tres mejoras previas de IA.
+
+**Verificación:** recorrido Compose ampliado para registro, visibilidad, identidad y acceso de ambas cuentas; contrato Room para incorporar cuentas en una base existente sin pérdida de datos. Resultados ejecutados en docs/PRUEBAS.md.

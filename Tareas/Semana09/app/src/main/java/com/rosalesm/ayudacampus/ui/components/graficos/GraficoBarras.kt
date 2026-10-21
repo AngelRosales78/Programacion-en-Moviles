@@ -11,10 +11,10 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun GraficoBarras(datos: List<DatoGrafico>) {
     val maximo=(datos.maxOfOrNull { it.valor } ?: 0f).coerceAtLeast(1f)
-    Row(Modifier.fillMaxWidth().height(170.dp),horizontalArrangement=Arrangement.spacedBy(6.dp),verticalAlignment=Alignment.Bottom) {
+    Row(Modifier.fillMaxWidth().height(134.dp),horizontalArrangement=Arrangement.spacedBy(6.dp),verticalAlignment=Alignment.Bottom) {
         datos.forEach { d -> Column(Modifier.weight(1f),horizontalAlignment=Alignment.CenterHorizontally) {
             Text("${d.valor.toInt()}",style=MaterialTheme.typography.labelSmall)
-            Canvas(Modifier.fillMaxWidth().height(110.dp)) {
+            Canvas(Modifier.fillMaxWidth().height(88.dp)) {
                 val alto=(d.valor/maximo)*size.height
                 drawRoundRect(d.color,topLeft=Offset(size.width*0.1f,size.height-alto),size=Size(size.width*0.8f,alto))
             }

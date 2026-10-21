@@ -5,7 +5,7 @@ import com.rosalesm.ayudacampus.data.local.entity.*
 
 object DatosIniciales {
     suspend fun sembrar(db: AyudaDatabase) = db.withTransaction {
-        if (db.usuarioDao().contar() != 0) return@withTransaction
+        if (db.usuarioDao().contar() == 0) {
         db.usuarioDao().insertarTodas(listOf(
             Usuario(1, "Juan Pérez", "juan@campus.test", "1234", "CLIENTE"),
             Usuario(2, "Soporte TI", "soporte@campus.test", "admin", "ADMIN")
@@ -28,5 +28,17 @@ object DatosIniciales {
         ejemplos.forEach { db.ticketDao().insertarTicket(it) }
         db.ticketDao().insertarComentario(Comentario(ticketId=1,autorId=1,autorNombre="Juan Pérez",autorRol="CLIENTE",texto="Gracias, quedo atento.",fecha=ahora-hora))
         db.ticketDao().insertarComentario(Comentario(ticketId=1,autorId=2,autorNombre="Soporte TI",autorRol="ADMIN",texto="Reiniciamos el equipo. ¿Ya tienes señal?",fecha=ahora-1_800_000))
+        }
+        val cuentas = listOf(
+            Usuario(nombre="prueba", correo="prueba@prueba.com", clave="1234", rol="CLIENTE"),
+            Usuario(nombre="soporte", correo="soporte@soporte.com", clave="1234", rol="ADMIN")
+        )
+        cuentas.forEach { cuenta ->
+            val existente = db.usuarioDao().buscarCorreo(cuenta.correo)
+            if (existente == null) db.usuarioDao().insertar(cuenta)
+            else if (existente.nombre != cuenta.nombre || existente.clave != cuenta.clave || existente.rol != cuenta.rol) {
+                db.usuarioDao().actualizar(cuenta.copy(id=existente.id))
+            }
+        }
     }
 }

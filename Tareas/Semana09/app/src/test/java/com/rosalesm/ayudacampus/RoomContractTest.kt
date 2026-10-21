@@ -27,7 +27,7 @@ class RoomContractTest {
     @After fun cerrar() { db.close() }
     @Test fun semillaYPanel() = runBlocking {
         DatosIniciales.sembrar(db)
-        assertEquals(2,db.usuarioDao().contar())
+        assertEquals(4,db.usuarioDao().contar())
         assertEquals(5,repo.observarCategorias().first().size)
         val lista=repo.observarTodosLosTickets().first()
         assertEquals(6,lista.size)
@@ -38,6 +38,19 @@ class RoomContractTest {
         assertEquals(86_400_000.0,repo.observarPromedioResolucion().first()!!,1.0)
         assertNull(repo.login("juan@campus.test","incorrecta"))
         assertNotNull(repo.login("JUAN@campus.test","1234"))
+    }
+    @Test fun cuentasEnInstalacionExistente() = runBlocking {
+        val historial=repo.observarTodosLosTickets().first()
+        db.openHelper.writableDatabase.execSQL("DELETE FROM usuarios WHERE correo IN ('prueba@prueba.com','soporte@soporte.com')")
+        DatosIniciales.sembrar(db)
+        val prueba=repo.login("prueba@prueba.com","1234")!!
+        val soporte=repo.login("soporte@soporte.com","1234")!!
+        assertEquals("prueba",prueba.nombre); assertEquals("CLIENTE",prueba.rol)
+        assertEquals("soporte",soporte.nombre); assertEquals("ADMIN",soporte.rol)
+        DatosIniciales.sembrar(db)
+        assertEquals(prueba.id,repo.login("prueba@prueba.com","1234")!!.id)
+        assertEquals(4,db.usuarioDao().contar())
+        assertEquals(historial,repo.observarTodosLosTickets().first())
     }
     @Test fun cicloTicket() = runBlocking {
         val juan=repo.login("juan@campus.test","1234")!!

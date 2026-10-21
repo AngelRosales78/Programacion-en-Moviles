@@ -20,8 +20,8 @@ fun AyudaCampusTheme(darkTheme: Boolean=isSystemInDarkTheme(),rol: Rol=Rol.CLIEN
         primary=if(soporte) Color(0xFF7C3AED) else Color(0xFF0891B2),
         primaryContainer=if(soporte) Color(0xFFEDE4FF) else Color(0xFFCFFAFE),
         secondaryContainer=if(soporte) Color(0xFFEDE4FF) else Color(0xFFCFFAFE),
-        surfaceContainer=Color.White,surfaceContainerHighest=Color.White,
-        background=if(soporte) Color(0xFFFAF8FF) else Color(0xFFF7FDFE),surface=Color.White,
+        surfaceContainer=Color.White,surfaceContainerHighest=Color.White,outline=Color(0xFFE1E5EA),outlineVariant=Color(0xFFE1E5EA),onSurfaceVariant=Color(0xFF77808C),
+        background=if(soporte) Color(0xFFFAF8FF) else Color(0xFFF6FCFE),surface=Color.White,
         tertiary=Color(0xFF16A34A),tertiaryContainer=Color(0xFFDCFCE7),onTertiaryContainer=Color(0xFF14532D),
         onBackground=Color(0xFF1E293B),onSurface=Color(0xFF1E293B)
     )

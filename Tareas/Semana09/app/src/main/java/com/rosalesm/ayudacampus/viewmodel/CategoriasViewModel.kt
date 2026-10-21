@@ -27,8 +27,8 @@ class CategoriasViewModel(private val repo: AyudaRepository) : ViewModel() {
         require(icono in listOf("pc","code","wifi","key","printer","tag")) { "Selecciona un icono válido" }
         repo.guardarCategoria(Categoria(idExistente,nombre.trim(),icono,activa)); onExito()
     }
-    fun eliminar(c: Categoria) = accion {
+    fun eliminar(c: Categoria,onExito: () -> Unit = {}) = accion {
         check(!repo.categoriaTieneTickets(c.id)) { "No se puede eliminar una categoría que ya tiene tickets" }
-        repo.eliminarCategoria(c)
+        repo.eliminarCategoria(c); onExito()
     }
 }

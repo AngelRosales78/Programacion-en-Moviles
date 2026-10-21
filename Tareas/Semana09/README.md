@@ -9,20 +9,23 @@ Abre **Tareas/Semana09** en Android Studio, selecciona **JDK 17** para Gradle, s
 Desde esta carpeta, en Windows:
 
 ```powershell
-.\gradlew.bat :app:assembleDebug
 .\gradlew.bat :app:testDebugUnitTest :app:lintDebug
 ```
 
-El APK de prueba se genera en `app/build/outputs/apk/debug/app-debug.apk`.
+Los cambios se abren y ejecutan directamente desde Android Studio.
 
 ## Cuentas ficticias iniciales
 
 | Perfil | Correo | Contraseña |
 |---|---|---|
-| Estudiante | juan@campus.test | 1234 |
+| Estudiante · prueba | prueba@prueba.com | 1234 |
+| Soporte TI · soporte | soporte@soporte.com | 1234 |
+| Estudiante anterior | juan@campus.test | 1234 |
 | Soporte TI | soporte@campus.test | admin |
 
-La primera ejecución crea cinco categorías, dos usuarios y seis tickets en diferentes estados, con comentarios. Las instalaciones existentes conservan sus datos: la semilla no vuelve a ejecutarse sobre una base con usuarios y la migración 1 → 2 conserva el historial. Por eso una instalación anterior puede tener otros datos de prueba.
+La primera ejecución crea cinco categorías, cuatro usuarios y seis tickets con comentarios. Las cuentas **prueba** y **soporte** se incorporan también en instalaciones existentes, sin borrar usuarios ni historial. La migración 1 → 2 conserva los datos. Cada estudiante ve sus propios tickets; la cuenta prueba comienza sin tickets.
+
+La interfaz sigue las referencias entregadas: acento turquesa para estudiantes y violeta para soporte. Perfil y Ajustes muestran el nombre y correo de la sesión; el registro incluye controles independientes para mostrar u ocultar contraseña y confirmación.
 
 El modo práctica permite cambiar de perfil desde Perfil/Ajustes sin volver al login. Si entras con un estudiante registrado, el cambio de vuelta desde soporte conserva ese estudiante durante la sesión. Cada equipo tiene su propia base; no se conecta a un servidor.
 
@@ -98,7 +101,7 @@ Las siguientes imágenes se generan ejecutando el recorrido de Compose en Androi
 
 ## Pruebas y trazabilidad
 
-Resultado final: **13 pruebas locales aprobadas y Android Lint sin errores** (59 advertencias documentadas).
+Resultado final: **14 pruebas locales aprobadas y Android Lint sin errores** (59 advertencias documentadas).
 
 Consulta [docs/PRUEBAS.md](docs/PRUEBAS.md) para el resultado y alcance real de las verificaciones. Las pruebas están en `app/src/test/java/com/rosalesm/ayudacampus/` e incluyen reglas de negocio, filtros, límites del SLA, consultas reales de Room, migración y un recorrido de Compose. Para repetir solo el recorrido que genera capturas:
 

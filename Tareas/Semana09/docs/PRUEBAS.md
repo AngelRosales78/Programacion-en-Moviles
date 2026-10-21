@@ -5,7 +5,7 @@ Fecha: 20 de octubre de 2026. Proyecto: `Tareas/Semana09`, rama `Con-IA-Semana09
 ## Resultado ejecutado
 
 - Compilación de Kotlin, Java y procesamiento Room/KSP: correctos.
-- `:app:testDebugUnitTest`: **13 pruebas, 0 fallos, 0 errores**.
+- `:app:testDebugUnitTest`: **14 pruebas, 0 fallos, 0 errores**.
 - `:app:lintDebug`: **0 errores y 59 advertencias**. Los informes completos se regeneran en `app/build/reports/`.
 - Seis capturas de la ventana real de Compose generadas con Robolectric/Android SDK 34 y gráficos nativos; revisadas visualmente. No son mockups ni imágenes generadas con IA.
 - Verificación de Git: los commits de esta entrega solo incluyen archivos bajo `Tareas/Semana09`.
@@ -26,8 +26,8 @@ Se usa compilación en el proceso de Gradle para evitar que un daemon de Kotlin 
 | SlaTest | 2 | Límites exactos de 4/24/72 h; reloj anterior a la creación; resueltos/cerrados sin vencimiento activo. |
 | BandejaTest | 1 | Cuatro filtros simultáneos, texto con número/nombre y conservación del orden original. |
 | DuracionTest | 1 | Formato del promedio en minutos/horas y menos de un minuto. |
-| RoomContractTest | 3 | Semilla única, seis tickets, orden y conteos/alerta/promedio; ciclo de ticket y comentarios; visibilidad por cliente; correo único; categorías; migración 1 → 2 sin pérdida de historial. |
-| AppAcceptanceTest | 1 | Recorrido de ambos perfiles, login incorrecto/correcto, validación del formulario, creación real, cambio de pestaña durante guardado, panel, categorías, recepción cerrada y modo oscuro después de recrear la actividad; genera seis capturas. |
+| RoomContractTest | 4 | Adición de cuentas en base existente sin perder historial, semilla única, seis tickets, orden y conteos/alerta/promedio; ciclo de ticket y comentarios; visibilidad por cliente; correo único; categorías; migración 1 → 2 sin pérdida de historial. |
+| AppAcceptanceTest | 1 | Recorrido de ambos perfiles, login incorrecto/correcto, validación del formulario, creación real, cambio de pestaña durante guardado, panel, categorías, recepción cerrada y modo oscuro después de recrear la actividad; genera seis capturas. Comprueba registro con nombre/correo reales en Perfil, mostrar/ocultar ambas contraseñas y login de prueba y soporte. |
 | ExampleUnitTest | 1 | Prueba aritmética que ya incluía el proyecto. |
 
 ## Matriz de aceptación de la guía
@@ -61,4 +61,4 @@ No se ejecutaron pruebas en un teléfono físico ni el conjunto de instrumentaci
 
 Las advertencias de Lint incluyen recomendaciones de dependencias/SDK y organización del catálogo de versiones; no se ocultaron con un baseline. Gradle avisa además que AGP 8.7.x fue probado oficialmente hasta compileSdk 35, mientras el proyecto existente compila con el SDK 36 instalado. La compilación y las pruebas indicadas terminaron correctamente con esa configuración.
 
-La app permanece local, con datos ficticios; las preferencias de notificaciones no implementan un servicio push. Las credenciales de práctica y los seis tickets se siembran solo en instalaciones nuevas.
+La app permanece local, con datos ficticios; las preferencias de notificaciones no implementan un servicio push. Los seis tickets de ejemplo se siembran solo en instalaciones nuevas. Las cuentas prueba y soporte se incorporan también a bases existentes, sin borrar datos.
