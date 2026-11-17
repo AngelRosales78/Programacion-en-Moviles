@@ -7,16 +7,13 @@ import com.tecsup.centrotareas.data.TareasRepository
 import com.tecsup.centrotareas.model.CargaUi
 import com.tecsup.centrotareas.model.PrimosUi
 import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 class TareasViewModel(private val repo: TareasRepository) : ViewModel() {
 
@@ -33,7 +30,8 @@ class TareasViewModel(private val repo: TareasRepository) : ViewModel() {
     private val _corriendo = MutableStateFlow(false)
     val corriendo: StateFlow<Boolean> = _corriendo.asStateFlow()
 
-    // Pasos 2, 3 y 4: tarea larga en una corrutina, con progreso y cancelable
+    // Pasos 2, 3 y 4 + mejora IA: el trabajo simulado vive en el Repository y llega
+    // como Flow; el ViewModel solo lo recolecta (en main) y actualiza el estado.
     fun tareaLarga() {
         if (_corriendo.value) return // evita el doble inicio
         trabajo = viewModelScope.launch {
@@ -42,13 +40,7 @@ class TareasViewModel(private val repo: TareasRepository) : ViewModel() {
             _mensaje.value = "Trabajando..."
             try {
                 Log.d("HILO", "Antes: ${Thread.currentThread().name}")
-                for (i in 1..100) {
-                    withContext(Dispatchers.Default) {
-                        if (i == 1) Log.d("HILO", "Dentro: ${Thread.currentThread().name}")
-                        delay(40)
-                    }
-                    _progreso.value = i / 100f
-                }
+                repo.progresoTarea().collect { valor -> _progreso.value = valor }
                 Log.d("HILO", "Despues: ${Thread.currentThread().name}")
                 _mensaje.value = "Terminó"
             } finally {
