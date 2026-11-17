@@ -114,3 +114,14 @@ D HILO : Despues: main
    lenta: máximo(2 s, 3 s) ≈ 3 s. Si una falla, `coroutineScope` cancela a la otra y
    propaga la excepción; el `try/catch` la atrapa y muestra el estado de error
    (relanzando siempre la `CancellationException`).
+
+## Fase 2 — Mejoras con IA (rama `mejora-ia-sem14`)
+
+1. **Progreso desde el Repository:** la tarea simulada vive en `TareasRepositoryLocal.progresoTarea()`
+   como `flow { ... }.flowOn(Dispatchers.Default)`; el ViewModel solo la recolecta.
+2. **Primos con progreso:** `contarPrimos(hasta, alAvanzar)` informa el avance cada 1 % y la
+   tarjeta muestra una barra con *Calculando... N %*.
+3. **Comparación de tiempos:** tabla con veces, último y promedio de *Una por una* y *A la vez*,
+   y el ahorro promedio del modo en paralelo.
+
+El detalle de los prompts y las decisiones está en [PROMPTS.md](PROMPTS.md).
