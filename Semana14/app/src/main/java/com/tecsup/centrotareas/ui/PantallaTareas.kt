@@ -130,6 +130,7 @@ private fun TarjetaProgreso(vm: TareasViewModel) {
 @Composable
 private fun TarjetaPrimos(vm: TareasViewModel) {
     val estado by vm.primos.collectAsState()
+    val avance by vm.progresoPrimos.collectAsState()
     var texto by rememberSaveable { mutableStateOf("2000000") }
     var ultimoN by rememberSaveable { mutableIntStateOf(0) }
     val numero = texto.toIntOrNull()
@@ -169,12 +170,23 @@ private fun TarjetaPrimos(vm: TareasViewModel) {
         }
         when (val e = estado) {
             PrimosUi.Inicial -> Unit
-            PrimosUi.Calculando -> Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
-                Text("Calculando...")
+            PrimosUi.Calculando -> {
+                LinearProgressIndicator(
+                    progress = { avance },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(6.dp),
+                    trackColor = PistaProgreso,
+                    gapSize = 0.dp,
+                    drawStopIndicator = {}
+                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
+                    Text("Calculando... ${(avance * 100).toInt()} %")
+                }
             }
             is PrimosUi.Listo -> RecuadroExito {
                 Text(

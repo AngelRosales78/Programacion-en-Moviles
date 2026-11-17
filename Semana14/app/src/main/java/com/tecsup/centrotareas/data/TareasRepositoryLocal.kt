@@ -34,14 +34,18 @@ class TareasRepositoryLocal : TareasRepository {
     }
 
     // Paso 5: cálculo pesado (CPU) fuera del hilo principal y cancelable
-    override suspend fun contarPrimos(hasta: Int): Int = withContext(Dispatchers.Default) {
-        var cantidad = 0
-        for (n in 2..hasta) {
-            ensureActive()
-            if (esPrimo(n)) cantidad++
+    override suspend fun contarPrimos(hasta: Int, alAvanzar: (Float) -> Unit): Int =
+        withContext(Dispatchers.Default) {
+            val paso = maxOf(1, hasta / 100) // avisa como máximo 100 veces
+            var cantidad = 0
+            for (n in 2..hasta) {
+                ensureActive()
+                if (esPrimo(n)) cantidad++
+                if (n % paso == 0) alAvanzar(n.toFloat() / hasta)
+            }
+            alAvanzar(1f)
+            cantidad
         }
-        cantidad
-    }
 
     private fun esPrimo(n: Int): Boolean {
         if (n < 2) return false
