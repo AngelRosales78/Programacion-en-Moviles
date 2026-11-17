@@ -1,6 +1,7 @@
 package com.tecsup.centrotareas.ui
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
@@ -9,17 +10,21 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -28,15 +33,21 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.tecsup.centrotareas.model.PrimosUi
 import com.tecsup.centrotareas.ui.theme.BordeTarjeta
 import com.tecsup.centrotareas.ui.theme.PistaProgreso
+import com.tecsup.centrotareas.ui.theme.VerdeFondo
+import com.tecsup.centrotareas.ui.theme.VerdeTexto
 import com.tecsup.centrotareas.viewmodel.TareasViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -114,8 +125,63 @@ private fun TarjetaProgreso(vm: TareasViewModel) {
 // ---------- Tarjeta 2: Contar números primos (paso 5) ----------
 @Composable
 private fun TarjetaPrimos(vm: TareasViewModel) {
+    val estado by vm.primos.collectAsState()
+    var texto by rememberSaveable { mutableStateOf("2000000") }
+    var ultimoN by rememberSaveable { mutableIntStateOf(0) }
+    val numero = texto.toIntOrNull()
+    val valido = numero != null && numero >= 2
+    val calculando = estado == PrimosUi.Calculando
+
     Tarjeta(titulo = "Contar números primos") {
-        // TODO Paso 5: campo numérico, Contar, Cancelar y resultado
+        OutlinedTextField(
+            value = texto,
+            onValueChange = { nuevo -> if (nuevo.all { it.isDigit() } && nuevo.length <= 9) texto = nuevo },
+            label = { Text("Hasta el número") },
+            singleLine = true,
+            isError = texto.isNotEmpty() && !valido,
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+            modifier = Modifier.fillMaxWidth()
+        )
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Button(
+                onClick = {
+                    if (numero != null && numero >= 2) {
+                        ultimoN = numero
+                        vm.contar(numero)
+                    }
+                },
+                enabled = valido && !calculando
+            ) {
+                Text("Contar", fontWeight = FontWeight.Bold)
+            }
+            OutlinedButton(
+                onClick = { vm.cancelarPrimos() },
+                enabled = calculando,
+                border = bordeBoton(calculando),
+                colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.primary)
+            ) {
+                Text("Cancelar", fontWeight = FontWeight.Bold)
+            }
+        }
+        when (val e = estado) {
+            PrimosUi.Inicial -> Unit
+            PrimosUi.Calculando -> Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
+                Text("Calculando...")
+            }
+            is PrimosUi.Listo -> RecuadroExito {
+                Text(
+                    "Primos hasta $ultimoN: ${e.cantidad}",
+                    fontWeight = FontWeight.Bold,
+                    color = VerdeTexto
+                )
+                Text("Tiempo: ${e.milisegundos} ms", color = VerdeTexto)
+            }
+            PrimosUi.Cancelado -> RecuadroError("Cancelado")
+        }
     }
 }
 
@@ -153,6 +219,31 @@ private fun Tarjeta(titulo: String, contenido: @Composable ColumnScope.() -> Uni
             contenido()
         }
     }
+}
+
+@Composable
+private fun RecuadroExito(contenido: @Composable ColumnScope.() -> Unit) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(VerdeFondo, RoundedCornerShape(12.dp))
+            .padding(12.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        content = contenido
+    )
+}
+
+@Composable
+private fun RecuadroError(mensaje: String) {
+    Text(
+        mensaje,
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(MaterialTheme.colorScheme.errorContainer, RoundedCornerShape(12.dp))
+            .padding(12.dp),
+        color = MaterialTheme.colorScheme.onErrorContainer,
+        textAlign = TextAlign.Center
+    )
 }
 
 @Composable
