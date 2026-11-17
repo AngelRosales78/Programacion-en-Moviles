@@ -18,3 +18,11 @@ sealed interface CargaUi {
     ) : CargaUi
     data class Error(val mensaje: String) : CargaUi
 }
+
+/** Mejora IA: tiempos acumulados (ms) de cada modo de carga. */
+data class TiemposCarga(
+    val unaPorUna: List<Long> = emptyList(),
+    val aLaVez: List<Long> = emptyList()
+) {
+    val vacio: Boolean get() = unaPorUna.isEmpty() && aLaVez.isEmpty()
+}

@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.tecsup.centrotareas.data.TareasRepository
 import com.tecsup.centrotareas.model.CargaUi
 import com.tecsup.centrotareas.model.PrimosUi
+import com.tecsup.centrotareas.model.TiemposCarga
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
@@ -13,6 +14,7 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class TareasViewModel(private val repo: TareasRepository) : ViewModel() {
@@ -96,6 +98,14 @@ class TareasViewModel(private val repo: TareasRepository) : ViewModel() {
         _simularError.value = valor
     }
 
+    // Mejora IA: acumula los tiempos de cada modo para compararlos
+    private val _tiempos = MutableStateFlow(TiemposCarga())
+    val tiempos: StateFlow<TiemposCarga> = _tiempos.asStateFlow()
+
+    fun limpiarTiempos() {
+        _tiempos.value = TiemposCarga()
+    }
+
     // Paso 6: una después de otra (≈ 2 s + 3 s = 5 s)
     fun cargarUnaPorUna() {
         if (_carga.value == CargaUi.Cargando) return
@@ -105,9 +115,9 @@ class TareasViewModel(private val repo: TareasRepository) : ViewModel() {
             try {
                 val perfil = repo.cargarPerfil()
                 val pedidos = repo.cargarPedidos(_simularError.value)
-                _carga.value = CargaUi.Exito(
-                    "Una por una", perfil, pedidos.size, System.currentTimeMillis() - inicio
-                )
+                val ms = System.currentTimeMillis() - inicio
+                _carga.value = CargaUi.Exito("Una por una", perfil, pedidos.size, ms)
+                _tiempos.update { it.copy(unaPorUna = it.unaPorUna + ms) }
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
@@ -128,9 +138,9 @@ class TareasViewModel(private val repo: TareasRepository) : ViewModel() {
                     val b = async { repo.cargarPedidos(_simularError.value) }
                     Pair(a.await(), b.await())
                 }
-                _carga.value = CargaUi.Exito(
-                    "A la vez", perfil, pedidos.size, System.currentTimeMillis() - inicio
-                )
+                val ms = System.currentTimeMillis() - inicio
+                _carga.value = CargaUi.Exito("A la vez", perfil, pedidos.size, ms)
+                _tiempos.update { it.copy(aLaVez = it.aLaVez + ms) }
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {

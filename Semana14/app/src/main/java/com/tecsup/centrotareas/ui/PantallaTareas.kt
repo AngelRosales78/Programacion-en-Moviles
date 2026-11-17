@@ -30,6 +30,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -48,6 +49,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.tecsup.centrotareas.model.CargaUi
 import com.tecsup.centrotareas.model.PrimosUi
+import com.tecsup.centrotareas.model.TiemposCarga
 import com.tecsup.centrotareas.ui.theme.BordeTarjeta
 import com.tecsup.centrotareas.ui.theme.PistaProgreso
 import com.tecsup.centrotareas.ui.theme.VerdeFondo
@@ -206,6 +208,7 @@ private fun TarjetaPrimos(vm: TareasViewModel) {
 private fun TarjetaCargas(vm: TareasViewModel) {
     val estado by vm.carga.collectAsState()
     val simularError by vm.simularError.collectAsState()
+    val tiempos by vm.tiempos.collectAsState()
     val cargando = estado == CargaUi.Cargando
 
     Tarjeta(titulo = "Dos cargas") {
@@ -253,6 +256,64 @@ private fun TarjetaCargas(vm: TareasViewModel) {
                 }
             }
         }
+        if (!tiempos.vacio) {
+            TablaTiempos(tiempos, alLimpiar = { vm.limpiarTiempos() })
+        }
+    }
+}
+
+// Mejora IA: tabla que compara los tiempos acumulados de cada modo
+@Composable
+private fun TablaTiempos(tiempos: TiemposCarga, alLimpiar: () -> Unit) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(MaterialTheme.colorScheme.primaryContainer, RoundedCornerShape(12.dp))
+            .padding(12.dp),
+        verticalArrangement = Arrangement.spacedBy(4.dp)
+    ) {
+        Text(
+            "Comparación de tiempos",
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.primary
+        )
+        FilaTabla("Modo", "Veces", "Último", "Promedio", negrita = true)
+        FilaTiempos("Una por una", tiempos.unaPorUna)
+        FilaTiempos("A la vez", tiempos.aLaVez)
+        if (tiempos.unaPorUna.isNotEmpty() && tiempos.aLaVez.isNotEmpty()) {
+            val ahorro = tiempos.unaPorUna.average() - tiempos.aLaVez.average()
+            Text(
+                "«A la vez» ahorra ≈ ${ahorro.toLong()} ms en promedio",
+                modifier = Modifier.fillMaxWidth(),
+                textAlign = TextAlign.Center,
+                style = MaterialTheme.typography.bodySmall
+            )
+        }
+        TextButton(onClick = alLimpiar, modifier = Modifier.align(Alignment.End)) {
+            Text("Limpiar")
+        }
+    }
+}
+
+@Composable
+private fun FilaTiempos(modo: String, lista: List<Long>) {
+    FilaTabla(
+        modo,
+        lista.size.toString(),
+        lista.lastOrNull()?.let { "$it ms" } ?: "—",
+        if (lista.isEmpty()) "—" else "${lista.average().toLong()} ms"
+    )
+}
+
+@Composable
+private fun FilaTabla(a: String, b: String, c: String, d: String, negrita: Boolean = false) {
+    val peso = if (negrita) FontWeight.Bold else FontWeight.Normal
+    val estilo = MaterialTheme.typography.bodyMedium
+    Row(modifier = Modifier.fillMaxWidth()) {
+        Text(a, modifier = Modifier.weight(1.4f), fontWeight = peso, style = estilo)
+        Text(b, modifier = Modifier.weight(0.8f), fontWeight = peso, style = estilo, textAlign = TextAlign.Center)
+        Text(c, modifier = Modifier.weight(1f), fontWeight = peso, style = estilo, textAlign = TextAlign.End)
+        Text(d, modifier = Modifier.weight(1.1f), fontWeight = peso, style = estilo, textAlign = TextAlign.End)
     }
 }
 
