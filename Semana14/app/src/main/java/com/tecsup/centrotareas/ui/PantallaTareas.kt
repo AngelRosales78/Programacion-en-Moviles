@@ -6,11 +6,13 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -26,6 +28,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -190,9 +193,21 @@ private fun TarjetaPrimos(vm: TareasViewModel) {
 @Composable
 private fun TarjetaCargas(vm: TareasViewModel) {
     val estado by vm.carga.collectAsState()
+    val simularError by vm.simularError.collectAsState()
     val cargando = estado == CargaUi.Cargando
 
     Tarjeta(titulo = "Dos cargas") {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Switch(
+                checked = simularError,
+                onCheckedChange = { vm.cambiarSimularError(it) }
+            )
+            Spacer(Modifier.width(8.dp))
+            Text("Simular error")
+        }
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             OutlinedButton(
                 onClick = { vm.cargarUnaPorUna() },
@@ -207,6 +222,7 @@ private fun TarjetaCargas(vm: TareasViewModel) {
             }
         }
         when (val e = estado) {
+            CargaUi.Inicial -> Unit
             CargaUi.Cargando -> CircularProgressIndicator()
             is CargaUi.Exito -> RecuadroExito {
                 Text("Modo: ${e.modo}", fontWeight = FontWeight.Bold, color = VerdeTexto)
@@ -214,7 +230,16 @@ private fun TarjetaCargas(vm: TareasViewModel) {
                 Text("Pedidos: ${e.pedidos}", color = VerdeTexto)
                 Text("Tiempo: ${e.milisegundos} ms", color = VerdeTexto)
             }
-            else -> Unit
+            is CargaUi.Error -> {
+                RecuadroError(e.mensaje)
+                OutlinedButton(
+                    onClick = { vm.reintentar() },
+                    border = bordeBoton(true),
+                colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.primary)
+                ) {
+                    Text("Reintentar", fontWeight = FontWeight.Bold)
+                }
+            }
         }
     }
 }
