@@ -43,6 +43,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.tecsup.centrotareas.model.CargaUi
 import com.tecsup.centrotareas.model.PrimosUi
 import com.tecsup.centrotareas.ui.theme.BordeTarjeta
 import com.tecsup.centrotareas.ui.theme.PistaProgreso
@@ -188,8 +189,33 @@ private fun TarjetaPrimos(vm: TareasViewModel) {
 // ---------- Tarjeta 3: Dos cargas (pasos 6 y 7) ----------
 @Composable
 private fun TarjetaCargas(vm: TareasViewModel) {
+    val estado by vm.carga.collectAsState()
+    val cargando = estado == CargaUi.Cargando
+
     Tarjeta(titulo = "Dos cargas") {
-        // TODO Pasos 6 y 7: Una por una, A la vez, Simular error y Reintentar
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            OutlinedButton(
+                onClick = { vm.cargarUnaPorUna() },
+                enabled = !cargando,
+                border = bordeBoton(!cargando),
+                colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.primary)
+            ) {
+                Text("Una por una", fontWeight = FontWeight.Bold)
+            }
+            Button(onClick = { vm.cargarALaVez() }, enabled = !cargando) {
+                Text("A la vez", fontWeight = FontWeight.Bold)
+            }
+        }
+        when (val e = estado) {
+            CargaUi.Cargando -> CircularProgressIndicator()
+            is CargaUi.Exito -> RecuadroExito {
+                Text("Modo: ${e.modo}", fontWeight = FontWeight.Bold, color = VerdeTexto)
+                Text("Perfil: ${e.perfil}", color = VerdeTexto)
+                Text("Pedidos: ${e.pedidos}", color = VerdeTexto)
+                Text("Tiempo: ${e.milisegundos} ms", color = VerdeTexto)
+            }
+            else -> Unit
+        }
     }
 }
 
