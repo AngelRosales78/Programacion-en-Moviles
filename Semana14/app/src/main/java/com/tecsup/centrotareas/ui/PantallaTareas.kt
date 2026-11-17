@@ -4,6 +4,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -12,11 +13,13 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -71,14 +74,25 @@ fun PantallaTareas(vm: TareasViewModel) {
 private fun TarjetaProgreso(vm: TareasViewModel) {
     val mensaje by vm.mensaje.collectAsState()
     val progreso by vm.progreso.collectAsState()
+    val corriendo by vm.corriendo.collectAsState()
     var toques by rememberSaveable { mutableIntStateOf(0) }
 
     Tarjeta(titulo = "Tarea con progreso") {
         Button(onClick = { toques++ }) {
             Text("Tócame: $toques", fontWeight = FontWeight.Bold)
         }
-        Button(onClick = { vm.tareaLarga() }) {
-            Text("Iniciar", fontWeight = FontWeight.Bold)
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Button(onClick = { vm.tareaLarga() }, enabled = !corriendo) {
+                Text("Iniciar", fontWeight = FontWeight.Bold)
+            }
+            OutlinedButton(
+                onClick = { vm.cancelar() },
+                enabled = corriendo,
+                border = bordeBoton(corriendo),
+                colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.primary)
+            ) {
+                Text("Cancelar", fontWeight = FontWeight.Bold)
+            }
         }
         LinearProgressIndicator(
             progress = { progreso },
@@ -140,3 +154,9 @@ private fun Tarjeta(titulo: String, contenido: @Composable ColumnScope.() -> Uni
         }
     }
 }
+
+@Composable
+private fun bordeBoton(habilitado: Boolean) = BorderStroke(
+    if (habilitado) 2.dp else 1.dp,
+    if (habilitado) MaterialTheme.colorScheme.primary else BordeTarjeta
+)
