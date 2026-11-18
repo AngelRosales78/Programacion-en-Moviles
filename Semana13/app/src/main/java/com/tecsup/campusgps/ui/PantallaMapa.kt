@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -23,11 +24,15 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import com.tecsup.campusgps.model.UbicacionUi
+import com.tecsup.campusgps.util.formatearDistancia
 import com.tecsup.campusgps.viewmodel.MapaViewModel
 import java.util.Locale
 
@@ -37,6 +42,7 @@ fun PantallaMapa(vm: MapaViewModel) {
     val estado by vm.estado.collectAsState()
     val lugares by vm.lugares.collectAsState()
     val seleccionado by vm.seleccionado.collectAsState()
+    val masCercano by vm.masCercano.collectAsState()
 
     val contexto = LocalContext.current
 
@@ -88,6 +94,7 @@ fun PantallaMapa(vm: MapaViewModel) {
                 estado = estado,
                 lugares = lugares,
                 seleccionado = seleccionado,
+                masCercanoId = masCercano?.id,
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f)
@@ -122,12 +129,35 @@ fun PantallaMapa(vm: MapaViewModel) {
                         textAlign = TextAlign.Center
                     )
                 }
+
+                // Paso 7: botón y texto del más cercano
+                if (estado is UbicacionUi.Lista) {
+                    OutlinedButton(
+                        onClick = { masCercano?.let { vm.seleccionar(it.id) } },
+                        enabled = masCercano != null
+                    ) { Text("Ir al más cercano") }
+
+                    val cercano = masCercano
+                    val metros = lugares.firstOrNull { it.lugar.id == cercano?.id }?.metros
+                    if (cercano != null && metros != null) {
+                        Text(
+                            buildAnnotatedString {
+                                withStyle(SpanStyle(fontWeight = FontWeight.Bold)) {
+                                    append("Más cercano: ")
+                                }
+                                append("${cercano.nombre} (${formatearDistancia(metros)})")
+                            },
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                    }
+                }
             }
 
             // Paso 6: lista con altura fija
             ListaLugares(
                 lugares = lugares,
                 seleccionado = seleccionado,
+                masCercanoId = masCercano?.id,
                 onClick = { vm.seleccionar(it) },
                 modifier = Modifier
                     .fillMaxWidth()
