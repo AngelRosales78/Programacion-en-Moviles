@@ -4,8 +4,8 @@ import android.Manifest
 import android.content.pm.PackageManager
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -29,6 +29,7 @@ import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import com.tecsup.campusgps.model.UbicacionUi
 import com.tecsup.campusgps.viewmodel.MapaViewModel
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -95,22 +96,26 @@ fun PantallaMapa(vm: MapaViewModel) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
+                    .padding(horizontal = 12.dp, vertical = 8.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(6.dp)
             ) {
                 Button(
                     onClick = { alPulsar() },
                     enabled = estado !is UbicacionUi.Buscando
                 ) { Text("Obtener mi ubicación") }
-                Spacer(Modifier.height(8.dp))
 
                 when (val actual = estado) {
                     UbicacionUi.Inicial -> Text("Pulsa el botón para empezar")
                     UbicacionUi.Buscando -> Text("Buscando tu ubicación…")
-                    is UbicacionUi.Lista -> {
-                        Text("Latitud: ${actual.posicion.latitud}")
-                        Text("Longitud: ${actual.posicion.longitud}")
-                    }
+                    is UbicacionUi.Lista -> Text(
+                        text = String.format(
+                            Locale.US, "Latitud: %.4f   Longitud: %.4f",
+                            actual.posicion.latitud, actual.posicion.longitud
+                        ),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                     is UbicacionUi.Error -> Text(
                         actual.mensaje,
                         color = MaterialTheme.colorScheme.error,
@@ -118,6 +123,16 @@ fun PantallaMapa(vm: MapaViewModel) {
                     )
                 }
             }
+
+            // Paso 6: lista con altura fija
+            ListaLugares(
+                lugares = lugares,
+                seleccionado = seleccionado,
+                onClick = { vm.seleccionar(it) },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(220.dp)
+            )
         }
     }
 }
