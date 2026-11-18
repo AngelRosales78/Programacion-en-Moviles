@@ -78,7 +78,7 @@ D HILO : Despues: main
 | Iniciar la tarea con progreso | La barra avanza de 0 a 100 % en ≈ 4 s | ✅ |
 | Cancelar a mitad | La barra se detiene, dice Cancelado y se puede iniciar otra vez | ✅ |
 | Pulsar Iniciar dos veces seguidas | No se lanzan dos tareas (botón deshabilitado) | ✅ |
-| Primos hasta 1000 | Resultado 168 | ⬜ |
+| Primos hasta 1000 | Resultado 168 | ✅ |
 | Primos con N grande | La pantalla no se congela y Cancelar funciona | ✅ |
 | Una por una | ≈ 5 s y resultado correcto | ✅ |
 | A la vez | ≈ 3 s y resultado correcto | ✅ |
