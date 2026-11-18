@@ -43,7 +43,8 @@ import java.util.Locale
 @Composable
 fun PantallaMapa(vm: MapaViewModel) {
     val estado by vm.estado.collectAsState()
-    val lugares by vm.lugares.collectAsState()
+    val lugares by vm.lugaresVisibles.collectAsState()
+    val categoria by vm.categoria.collectAsState()
     val seleccionado by vm.seleccionado.collectAsState()
     val masCercano by vm.masCercano.collectAsState()
 
@@ -129,6 +130,14 @@ fun PantallaMapa(vm: MapaViewModel) {
                     modifier = Modifier
                         .fillMaxWidth()
                         .weight(1f)
+                )
+
+                // Mejora IA 1: chips de categoría
+                FiltroCategorias(
+                    categorias = vm.categorias,
+                    seleccionada = categoria,
+                    onSeleccion = { vm.filtrarCategoria(it) },
+                    modifier = Modifier.fillMaxWidth()
                 )
 
                 Column(

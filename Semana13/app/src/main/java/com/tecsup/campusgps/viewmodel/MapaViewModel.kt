@@ -15,6 +15,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -35,8 +36,20 @@ class MapaViewModel(
     private val _seleccionado = MutableStateFlow<Int?>(null)
     val seleccionado: StateFlow<Int?> = _seleccionado.asStateFlow()
 
+    // Mejora IA 1: filtro por categoría (null = todas)
+    val categorias: List<String> = lugaresRepo.obtenerLugares().map { it.categoria }.distinct()
+
+    private val _categoria = MutableStateFlow<String?>(null)
+    val categoria: StateFlow<String?> = _categoria.asStateFlow()
+
+    // Lo que dibujan el mapa y la lista: los lugares de la categoría elegida
+    val lugaresVisibles: StateFlow<List<LugarConDistancia>> =
+        combine(_lugares, _categoria) { lista, cat ->
+            if (cat == null) lista else lista.filter { it.lugar.categoria == cat }
+        }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), _lugares.value)
+
     // Paso 7: el primero con distancia calculada (la lista ya está ordenada)
-    val masCercano: StateFlow<Lugar?> = _lugares
+    val masCercano: StateFlow<Lugar?> = lugaresVisibles
         .map { lista -> lista.firstOrNull { it.metros != null }?.lugar }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
 
@@ -70,6 +83,17 @@ class MapaViewModel(
     // Paso 6
     fun seleccionar(id: Int?) {
         _seleccionado.value = id
+    }
+
+    fun filtrarCategoria(cat: String?) {
+        _categoria.value = cat
+        // Si el lugar seleccionado queda oculto, se quita la selección
+        val sel = _seleccionado.value
+        if (cat != null && sel != null &&
+            _lugares.value.none { it.lugar.id == sel && it.lugar.categoria == cat }
+        ) {
+            _seleccionado.value = null
+        }
     }
 
     // Paso 5: calcula, ordena de menor a mayor y publica
