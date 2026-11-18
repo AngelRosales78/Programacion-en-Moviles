@@ -8,12 +8,14 @@ import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
+import com.google.maps.android.compose.Circle
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.rememberCameraPositionState
 import com.google.maps.android.compose.rememberUpdatedMarkerState
 import com.tecsup.campusgps.model.LugarConDistancia
 import com.tecsup.campusgps.model.UbicacionUi
+import com.tecsup.campusgps.ui.theme.AzulCampus
 
 @Composable
 fun MapaUbicacion(
@@ -21,7 +23,8 @@ fun MapaUbicacion(
     lugares: List<LugarConDistancia>,
     seleccionado: Int?,
     modifier: Modifier = Modifier,
-    masCercanoId: Int? = null
+    masCercanoId: Int? = null,
+    radio: Int? = null
 ) {
     val camara = rememberCameraPositionState {
         position = CameraPosition.fromLatLngZoom(LatLng(-12.0464, -77.0428), 12f)
@@ -58,6 +61,16 @@ fun MapaUbicacion(
                 ),
                 title = "Estás aquí"
             )
+            // Mejora IA 2: círculo del radio alrededor de tu posición
+            if (radio != null) {
+                Circle(
+                    center = LatLng(estado.posicion.latitud, estado.posicion.longitud),
+                    radius = radio.toDouble(),
+                    strokeColor = AzulCampus,
+                    strokeWidth = 3f,
+                    fillColor = AzulCampus.copy(alpha = 0.15f)
+                )
+            }
         }
 
         // Paso 4 y 7: un marcador por lugar, azul; el más cercano en verde

@@ -9,6 +9,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -16,6 +17,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
@@ -45,6 +47,8 @@ fun PantallaMapa(vm: MapaViewModel) {
     val estado by vm.estado.collectAsState()
     val lugares by vm.lugaresVisibles.collectAsState()
     val categoria by vm.categoria.collectAsState()
+    val radio by vm.radio.collectAsState()
+    val dentroDelRadio by vm.idsDentroDelRadio.collectAsState()
     val seleccionado by vm.seleccionado.collectAsState()
     val masCercano by vm.masCercano.collectAsState()
 
@@ -127,6 +131,7 @@ fun PantallaMapa(vm: MapaViewModel) {
                     lugares = lugares,
                     seleccionado = seleccionado,
                     masCercanoId = masCercano?.id,
+                    radio = radio,
                     modifier = Modifier
                         .fillMaxWidth()
                         .weight(1f)
@@ -173,6 +178,21 @@ fun PantallaMapa(vm: MapaViewModel) {
                             enabled = masCercano != null
                         ) { Text("Ir al más cercano") }
 
+                        // Mejora IA 2: selector de radio
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Text("Radio:", style = MaterialTheme.typography.bodyMedium)
+                            vm.radios.forEach { r ->
+                                FilterChip(
+                                    selected = radio == r,
+                                    onClick = { vm.cambiarRadio(r) },
+                                    label = { Text("$r m") }
+                                )
+                            }
+                        }
+
                         val cercano = masCercano
                         val metros = lugares.firstOrNull { it.lugar.id == cercano?.id }?.metros
                         if (cercano != null && metros != null) {
@@ -194,6 +214,7 @@ fun PantallaMapa(vm: MapaViewModel) {
                     lugares = lugares,
                     seleccionado = seleccionado,
                     masCercanoId = masCercano?.id,
+                    dentroDelRadio = dentroDelRadio,
                     onClick = { vm.seleccionar(it) },
                     modifier = Modifier
                         .fillMaxWidth()
