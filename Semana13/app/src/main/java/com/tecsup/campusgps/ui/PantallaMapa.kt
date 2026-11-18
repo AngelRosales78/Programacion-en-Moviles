@@ -25,8 +25,12 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -54,21 +58,31 @@ fun PantallaMapa(vm: MapaViewModel) {
 
     val contexto = LocalContext.current
 
-    // Paso 2: el cuadro de permiso lo dibuja Android; nosotros solo lo pedimos
-    val lanzador = rememberLauncherForActivityResult(
-        ActivityResultContracts.RequestMultiplePermissions()
-    ) { resultado ->
-        if (resultado.values.any { it }) vm.buscar() else vm.permisoDenegado()
-    }
-
-    fun alPulsar() {
+    fun tienePermiso(): Boolean {
         val fine = ContextCompat.checkSelfPermission(
             contexto, Manifest.permission.ACCESS_FINE_LOCATION
         ) == PackageManager.PERMISSION_GRANTED
         val coarse = ContextCompat.checkSelfPermission(
             contexto, Manifest.permission.ACCESS_COARSE_LOCATION
         ) == PackageManager.PERMISSION_GRANTED
-        if (fine || coarse) {
+        return fine || coarse
+    }
+
+    // Mejora IA 3: el mapa solo activa el punto azul si el permiso está concedido.
+    // Se vuelve a revisar cada vez que cambia el estado (p. ej. al volver de Ajustes).
+    var permisoConcedido by remember { mutableStateOf(tienePermiso()) }
+    LaunchedEffect(estado) { permisoConcedido = tienePermiso() }
+
+    // Paso 2: el cuadro de permiso lo dibuja Android; nosotros solo lo pedimos
+    val lanzador = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { resultado ->
+        permisoConcedido = resultado.values.any { it }
+        if (permisoConcedido) vm.buscar() else vm.permisoDenegado()
+    }
+
+    fun alPulsar() {
+        if (tienePermiso()) {
             vm.buscar()
         } else {
             lanzador.launch(
@@ -132,6 +146,7 @@ fun PantallaMapa(vm: MapaViewModel) {
                     seleccionado = seleccionado,
                     masCercanoId = masCercano?.id,
                     radio = radio,
+                    permisoConcedido = permisoConcedido,
                     modifier = Modifier
                         .fillMaxWidth()
                         .weight(1f)
