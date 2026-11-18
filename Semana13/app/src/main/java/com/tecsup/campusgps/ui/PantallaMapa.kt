@@ -1,11 +1,15 @@
 package com.tecsup.campusgps.ui
 
 import android.Manifest
+import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
+import android.provider.Settings
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -28,7 +32,6 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import com.tecsup.campusgps.model.UbicacionUi
@@ -72,6 +75,14 @@ fun PantallaMapa(vm: MapaViewModel) {
         }
     }
 
+    fun abrirAjustes() {
+        val intent = Intent(
+            Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+            Uri.fromParts("package", contexto.packageName, null)
+        ).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        contexto.startActivity(intent)
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -83,86 +94,103 @@ fun PantallaMapa(vm: MapaViewModel) {
             )
         }
     ) { padding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            // Paso 3: el mapa ocupa el espacio libre
-            MapaUbicacion(
-                estado = estado,
-                lugares = lugares,
-                seleccionado = seleccionado,
-                masCercanoId = masCercano?.id,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f)
-            )
-
+        val actual = estado
+        if (actual is UbicacionUi.Error) {
+            // Paso 8: pantalla de error (sin mapa): botón, mensaje y acción
             Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 12.dp, vertical = 8.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(6.dp)
+                    .fillMaxSize()
+                    .padding(padding)
+                    .padding(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Button(
-                    onClick = { alPulsar() },
-                    enabled = estado !is UbicacionUi.Buscando
-                ) { Text("Obtener mi ubicación") }
+                Spacer(Modifier.height(12.dp))
+                Button(onClick = { alPulsar() }) { Text("Obtener mi ubicación") }
+                Spacer(Modifier.height(16.dp))
+                MensajeError(
+                    error = actual,
+                    onAbrirAjustes = { abrirAjustes() },
+                    onReintentar = { alPulsar() }
+                )
+            }
+        } else {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(padding),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                // Paso 3: el mapa ocupa el espacio libre
+                MapaUbicacion(
+                    estado = actual,
+                    lugares = lugares,
+                    seleccionado = seleccionado,
+                    masCercanoId = masCercano?.id,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f)
+                )
 
-                when (val actual = estado) {
-                    UbicacionUi.Inicial -> Text("Pulsa el botón para empezar")
-                    UbicacionUi.Buscando -> Text("Buscando tu ubicación…")
-                    is UbicacionUi.Lista -> Text(
-                        text = String.format(
-                            Locale.US, "Latitud: %.4f   Longitud: %.4f",
-                            actual.posicion.latitud, actual.posicion.longitud
-                        ),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    is UbicacionUi.Error -> Text(
-                        actual.mensaje,
-                        color = MaterialTheme.colorScheme.error,
-                        textAlign = TextAlign.Center
-                    )
-                }
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 12.dp, vertical = 8.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    Button(
+                        onClick = { alPulsar() },
+                        enabled = actual !is UbicacionUi.Buscando
+                    ) { Text("Obtener mi ubicación") }
 
-                // Paso 7: botón y texto del más cercano
-                if (estado is UbicacionUi.Lista) {
-                    OutlinedButton(
-                        onClick = { masCercano?.let { vm.seleccionar(it.id) } },
-                        enabled = masCercano != null
-                    ) { Text("Ir al más cercano") }
-
-                    val cercano = masCercano
-                    val metros = lugares.firstOrNull { it.lugar.id == cercano?.id }?.metros
-                    if (cercano != null && metros != null) {
-                        Text(
-                            buildAnnotatedString {
-                                withStyle(SpanStyle(fontWeight = FontWeight.Bold)) {
-                                    append("Más cercano: ")
-                                }
-                                append("${cercano.nombre} (${formatearDistancia(metros)})")
-                            },
-                            style = MaterialTheme.typography.bodyMedium
+                    when (actual) {
+                        UbicacionUi.Inicial -> Text("Pulsa el botón para empezar")
+                        UbicacionUi.Buscando -> Text("Buscando tu ubicación…")
+                        is UbicacionUi.Lista -> Text(
+                            text = String.format(
+                                Locale.US, "Latitud: %.4f   Longitud: %.4f",
+                                actual.posicion.latitud, actual.posicion.longitud
+                            ),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
+                        else -> Unit
+                    }
+
+                    // Paso 7: botón y texto del más cercano
+                    if (actual is UbicacionUi.Lista) {
+                        OutlinedButton(
+                            onClick = { masCercano?.let { vm.seleccionar(it.id) } },
+                            enabled = masCercano != null
+                        ) { Text("Ir al más cercano") }
+
+                        val cercano = masCercano
+                        val metros = lugares.firstOrNull { it.lugar.id == cercano?.id }?.metros
+                        if (cercano != null && metros != null) {
+                            Text(
+                                buildAnnotatedString {
+                                    withStyle(SpanStyle(fontWeight = FontWeight.Bold)) {
+                                        append("Más cercano: ")
+                                    }
+                                    append("${cercano.nombre} (${formatearDistancia(metros)})")
+                                },
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                        }
                     }
                 }
-            }
 
-            // Paso 6: lista con altura fija
-            ListaLugares(
-                lugares = lugares,
-                seleccionado = seleccionado,
-                masCercanoId = masCercano?.id,
-                onClick = { vm.seleccionar(it) },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(220.dp)
-            )
+                // Paso 6: lista con altura fija
+                ListaLugares(
+                    lugares = lugares,
+                    seleccionado = seleccionado,
+                    masCercanoId = masCercano?.id,
+                    onClick = { vm.seleccionar(it) },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(220.dp)
+                )
+            }
         }
     }
 }

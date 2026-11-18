@@ -1,16 +1,16 @@
 package com.tecsup.campusgps.viewmodel
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.tecsup.campusgps.data.LugaresRepository
+import com.tecsup.campusgps.data.UbicacionNoDisponibleException
 import com.tecsup.campusgps.data.UbicacionRepository
 import com.tecsup.campusgps.model.Lugar
 import com.tecsup.campusgps.model.LugarConDistancia
 import com.tecsup.campusgps.model.Posicion
+import com.tecsup.campusgps.model.TipoError
 import com.tecsup.campusgps.model.UbicacionUi
 import com.tecsup.campusgps.util.distanciaMetros
-import com.tecsup.campusgps.util.formatearDistancia
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -41,6 +41,14 @@ class MapaViewModel(
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
 
     fun buscar() {
+        // Paso 8: sin Play Services no tiene sentido buscar
+        if (!ubicacionRepo.playServicesDisponible()) {
+            _estado.value = UbicacionUi.Error(
+                "Este dispositivo no tiene Google Play Services",
+                TipoError.SIN_PLAY_SERVICES
+            )
+            return
+        }
         _estado.value = UbicacionUi.Buscando
         viewModelScope.launch {
             ubicacionRepo.obtenerPosicion()
@@ -48,12 +56,15 @@ class MapaViewModel(
                     _estado.value = UbicacionUi.Lista(it)
                     actualizarDistancias(it)
                 }
-                .onFailure { _estado.value = UbicacionUi.Error(mensajeDe(it)) }
+                .onFailure { _estado.value = errorDe(it) }
         }
     }
 
     fun permisoDenegado() {
-        _estado.value = UbicacionUi.Error("Sin permiso de ubicación no puedo mostrar dónde estás")
+        _estado.value = UbicacionUi.Error(
+            "Sin permiso de ubicación no puedo mostrar dónde estás",
+            TipoError.SIN_PERMISO
+        )
     }
 
     // Paso 6
@@ -61,17 +72,23 @@ class MapaViewModel(
         _seleccionado.value = id
     }
 
-
     // Paso 5: calcula, ordena de menor a mayor y publica
     private fun actualizarDistancias(pos: Posicion) {
         _lugares.value = lugaresRepo.obtenerLugares()
             .map { LugarConDistancia(it, distanciaMetros(pos, it)) }
             .sortedBy { it.metros }
-        Log.d("CAMPUS", _lugares.value.joinToString { "${it.lugar.nombre}=${it.metros?.let(::formatearDistancia)}" })
     }
 
-    private fun mensajeDe(e: Throwable): String = when (e) {
-        is SecurityException -> "Falta el permiso de ubicación"
-        else -> e.message ?: "No se pudo obtener la ubicación"
+    private fun errorDe(e: Throwable): UbicacionUi.Error = when (e) {
+        is SecurityException -> UbicacionUi.Error(
+            "Falta el permiso de ubicación", TipoError.SIN_PERMISO
+        )
+        is UbicacionNoDisponibleException -> UbicacionUi.Error(
+            "No se pudo obtener la ubicación. Activa el GPS e intenta de nuevo",
+            TipoError.GPS_APAGADO
+        )
+        else -> UbicacionUi.Error(
+            e.message ?: "No se pudo obtener la ubicación", TipoError.OTRO
+        )
     }
 }
