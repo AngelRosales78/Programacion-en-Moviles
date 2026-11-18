@@ -1,5 +1,9 @@
 package com.tecsup.campusgps.ui
 
+import android.Manifest
+import android.content.pm.PackageManager
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -17,9 +21,11 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
 import com.tecsup.campusgps.model.UbicacionUi
 import com.tecsup.campusgps.viewmodel.MapaViewModel
 
@@ -28,9 +34,32 @@ import com.tecsup.campusgps.viewmodel.MapaViewModel
 fun PantallaMapa(vm: MapaViewModel) {
     val estado by vm.estado.collectAsState()
 
-    // TODO Paso 2: pedir el permiso de ubicación antes de buscar
+    val contexto = LocalContext.current
+
+    // Paso 2: el cuadro de permiso lo dibuja Android; nosotros solo lo pedimos
+    val lanzador = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { resultado ->
+        if (resultado.values.any { it }) vm.buscar() else vm.permisoDenegado()
+    }
+
     fun alPulsar() {
-        vm.buscar()
+        val fine = ContextCompat.checkSelfPermission(
+            contexto, Manifest.permission.ACCESS_FINE_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED
+        val coarse = ContextCompat.checkSelfPermission(
+            contexto, Manifest.permission.ACCESS_COARSE_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED
+        if (fine || coarse) {
+            vm.buscar()
+        } else {
+            lanzador.launch(
+                arrayOf(
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.ACCESS_COARSE_LOCATION
+                )
+            )
+        }
     }
 
     Scaffold(
