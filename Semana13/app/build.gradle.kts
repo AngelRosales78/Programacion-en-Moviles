@@ -5,9 +5,12 @@ plugins {
     alias(libs.plugins.kotlin.compose)
 }
 
-// TODO: lee local.properties (si existe) y úsalo en defaultConfig
+// Lee local.properties (si existe) para sacar la clave de Maps fuera del código
 val localProps = Properties().apply {
-    // TODO: cargar rootProject.file("local.properties")
+    val archivo = rootProject.file("local.properties")
+    if (archivo.exists()) {
+        archivo.inputStream().use { load(it) }
+    }
 }
 
 android {
@@ -25,7 +28,8 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
-        // TODO: manifestPlaceholders["MAPS_API_KEY"] = ...
+        // La clave llega al Manifest como ${MAPS_API_KEY}
+        manifestPlaceholders["MAPS_API_KEY"] = localProps.getProperty("MAPS_API_KEY", "")
     }
 
     buildTypes {
