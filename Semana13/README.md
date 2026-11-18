@@ -58,6 +58,16 @@ UbicacionRepository  ---> UbicacionRepositoryGoogle (FusedLocationProviderClient
 LugaresRepository    ---> LugaresRepositoryLocal (los 5 lugares fijos)
 ```
 
+## Mejoras con IA (rama `mejora-ia-sem13`)
+
+| Mejora | Qué hace | Capas |
+|---|---|---|
+| **Filtrar por categoría** | Chips *Todos, Estudio, Comida, Eventos, Servicios* que muestran solo esos lugares en el mapa y en la lista. El lugar verde se recalcula sobre lo visible. | ViewModel + View |
+| **Radio de cercanía** | Selector de 100, 200 o 500 m: dibuja un `Circle` alrededor de tu posición y la lista marca *Dentro del radio*. | ViewModel + View |
+| **Punto azul nativo** | `isMyLocationEnabled` y el botón de mi ubicación del mapa, solo si el permiso fue concedido. | View |
+
+El análisis de cada prompt está en [PROMPTS.md](PROMPTS.md).
+
 ## Datos ficticios
 
 | Id | Nombre | Categoría | Latitud | Longitud |
