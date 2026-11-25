@@ -4,7 +4,8 @@ package com.tecsup.avisoscampus.model
 enum class Origen(val texto: String, val urgente: Boolean = false) {
     BOTON("Botón"),
     RECORDATORIO("Recordatorio", urgente = true),
-    MODO_AVION("Modo avión")
+    MODO_AVION("Modo avión"),
+    CARGADOR("Cargador")
 }
 
 data class Aviso(

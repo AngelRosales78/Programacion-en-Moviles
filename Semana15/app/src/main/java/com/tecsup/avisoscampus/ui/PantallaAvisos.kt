@@ -46,6 +46,7 @@ import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import com.tecsup.avisoscampus.model.PermisoUi
 import com.tecsup.avisoscampus.notificacion.Notificador
+import com.tecsup.avisoscampus.receiver.CargadorReceiver
 import com.tecsup.avisoscampus.receiver.ModoAvionReceiver
 import com.tecsup.avisoscampus.ui.theme.BordeTarjeta
 import com.tecsup.avisoscampus.ui.theme.ErrorFondo
@@ -175,6 +176,7 @@ private fun TarjetaRecordatorio(vm: AvisosViewModel) {
 private fun TarjetaReceptor(vm: AvisosViewModel) {
     val contexto = LocalContext.current
     val escuchando by vm.escuchandoAvion.collectAsState()
+    val escuchandoCargador by vm.escuchandoCargador.collectAsState()
 
     DisposableEffect(escuchando) {
         if (escuchando) {
@@ -191,8 +193,25 @@ private fun TarjetaReceptor(vm: AvisosViewModel) {
         }
     }
 
+    DisposableEffect(escuchandoCargador) {
+        if (escuchandoCargador) {
+            val receptor = CargadorReceiver { conectado -> vm.alCambiarCargador(conectado) }
+            val filtro = IntentFilter().apply {
+                addAction(Intent.ACTION_POWER_CONNECTED)
+                addAction(Intent.ACTION_POWER_DISCONNECTED)
+            }
+            ContextCompat.registerReceiver(
+                contexto, receptor, filtro, ContextCompat.RECEIVER_NOT_EXPORTED
+            )
+            onDispose { contexto.unregisterReceiver(receptor) }
+        } else {
+            onDispose { }
+        }
+    }
+
     Tarjeta(titulo = "Receptor de anuncios") {
         FilaSwitch("Escuchar el modo avión", escuchando) { vm.cambiarEscucha(it) }
+        FilaSwitch("Escuchar el cargador", escuchandoCargador) { vm.cambiarEscuchaCargador(it) }
     }
 }
 
