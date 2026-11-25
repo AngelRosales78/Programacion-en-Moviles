@@ -6,19 +6,25 @@ import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tecsup.murocampus.data.PostRepositoryRemote
 import com.tecsup.murocampus.data.remote.RetrofitClient
+import com.tecsup.murocampus.ui.PantallaCrear
 import com.tecsup.murocampus.ui.PantallaDetalle
 import com.tecsup.murocampus.ui.PantallaLista
 import com.tecsup.murocampus.ui.theme.MuroCampusTheme
@@ -38,11 +44,13 @@ class MainActivity : ComponentActivity() {
         setContent {
             MuroCampusTheme {
                 val idSeleccionado by vm.idSeleccionado.collectAsStateWithLifecycle()
+                var creando by rememberSaveable { mutableStateOf(false) }
                 // Se guarda aquí para que la lista conserve su posición al volver
                 val posicion = rememberLazyListState()
                 val posicionFiltro = rememberLazyListState()
 
                 BackHandler(enabled = idSeleccionado != null) { vm.cerrarDetalle() }
+                BackHandler(enabled = creando) { creando = false }
 
                 Scaffold(
                     topBar = {
@@ -53,12 +61,28 @@ class MainActivity : ComponentActivity() {
                                 titleContentColor = MaterialTheme.colorScheme.onPrimary
                             )
                         )
+                    },
+                    floatingActionButton = {
+                        if (!creando && idSeleccionado == null) {
+                            FloatingActionButton(
+                                onClick = {
+                                    vm.limpiarEnvio()
+                                    creando = true
+                                }
+                            ) {
+                                Text("+", style = MaterialTheme.typography.headlineMedium)
+                            }
+                        }
                     }
                 ) { margen ->
-                    val modifier = Modifier.padding(margen)
-                    when (val id = idSeleccionado) {
-                        null -> PantallaLista(vm, posicion, posicionFiltro, modifier)
-                        else -> PantallaDetalle(vm, id, modifier)
+                    val modifier = Modifier
+                        .padding(margen)
+                        .consumeWindowInsets(margen)
+                    val id = idSeleccionado
+                    when {
+                        creando -> PantallaCrear(vm, modifier)
+                        id != null -> PantallaDetalle(vm, id, modifier)
+                        else -> PantallaLista(vm, posicion, posicionFiltro, modifier)
                     }
                 }
             }

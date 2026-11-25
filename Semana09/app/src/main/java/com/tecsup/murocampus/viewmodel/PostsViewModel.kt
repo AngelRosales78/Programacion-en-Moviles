@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.tecsup.murocampus.data.PostRepository
 import com.tecsup.murocampus.data.mensajeDe
 import com.tecsup.murocampus.model.Comentario
+import com.tecsup.murocampus.model.NuevoPost
 import com.tecsup.murocampus.model.Post
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
@@ -30,6 +31,10 @@ class PostsViewModel(private val repo: PostRepository) : ViewModel() {
 
     private val _detalle = MutableStateFlow<UiState<DetalleUi>>(UiState.Cargando)
     val detalle = _detalle.asStateFlow()
+
+    // null = aún no se envió
+    private val _envio = MutableStateFlow<UiState<Post>?>(null)
+    val envio = _envio.asStateFlow()
 
     private var trabajoLista: Job? = null
     private var trabajoDetalle: Job? = null
@@ -71,6 +76,19 @@ class PostsViewModel(private val repo: PostRepository) : ViewModel() {
     fun cerrarDetalle() {
         trabajoDetalle?.cancel()
         _idSeleccionado.value = null
+    }
+
+    fun publicar(titulo: String, texto: String) {
+        _envio.value = UiState.Cargando
+        viewModelScope.launch {
+            repo.crear(NuevoPost(userId = 1, title = titulo, body = texto))
+                .onSuccess { _envio.value = UiState.Exito(it) }
+                .onFailure { _envio.value = UiState.Error(mensajeDe(it)) }
+        }
+    }
+
+    fun limpiarEnvio() {
+        _envio.value = null
     }
 
     private suspend fun pedirDetalle(id: Int): Result<DetalleUi> = coroutineScope {
