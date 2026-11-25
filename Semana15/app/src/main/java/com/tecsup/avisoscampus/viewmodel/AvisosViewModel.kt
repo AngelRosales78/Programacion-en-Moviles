@@ -1,8 +1,10 @@
 package com.tecsup.avisoscampus.viewmodel
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.tecsup.avisoscampus.data.AvisosRepository
 import com.tecsup.avisoscampus.model.Aviso
+import com.tecsup.avisoscampus.model.Origen
 import com.tecsup.avisoscampus.model.PermisoUi
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -10,6 +12,7 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 
 class AvisosViewModel(private val repo: AvisosRepository) : ViewModel() {
 
@@ -30,8 +33,19 @@ class AvisosViewModel(private val repo: AvisosRepository) : ViewModel() {
         _permiso.value = if (concedido) PermisoUi.Concedido else PermisoUi.Denegado
     }
 
-    // TODO Paso 3: fun avisarAhora()
+    fun avisarAhora() {
+        viewModelScope.launch {
+            avisar("Tarea lista", "Tu entrega fue registrada", Origen.BOTON)
+        }
+    }
+
     // TODO Paso 5: faltan, recordarEn(segundos) y cancelarRecordatorio()
     // TODO Paso 6: escuchandoAvion, cambiarEscucha(valor) y alCambiarModoAvion(activo)
     // TODO Paso 8: fun noSePudoMostrar()
+
+    // Registra el aviso en el historial y pide a la pantalla que lo muestre
+    private suspend fun avisar(titulo: String, texto: String, origen: Origen) {
+        val aviso = repo.registrar(titulo, texto, origen)
+        _eventos.emit(aviso)
+    }
 }

@@ -125,7 +125,9 @@ private fun TarjetaPermiso(vm: AvisosViewModel) {
 @Composable
 private fun TarjetaAvisos(vm: AvisosViewModel) {
     Tarjeta(titulo = "Avisos") {
-        // TODO Paso 3: botón "Mostrar aviso"
+        Button(onClick = { vm.avisarAhora() }) {
+            Text("Mostrar aviso", fontWeight = FontWeight.Bold)
+        }
     }
 }
 
