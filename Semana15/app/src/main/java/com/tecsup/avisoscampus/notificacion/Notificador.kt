@@ -18,12 +18,16 @@ import com.tecsup.avisoscampus.model.Aviso
 
 object Notificador {
     const val CANAL = "avisos"
+    const val CANAL_URGENTES = "urgentes"
 
     fun crearCanal(context: Context) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val gestor = context.getSystemService(NotificationManager::class.java)
             gestor.createNotificationChannel(
                 NotificationChannel(CANAL, "Avisos", NotificationManager.IMPORTANCE_DEFAULT)
+            )
+            gestor.createNotificationChannel(
+                NotificationChannel(CANAL_URGENTES, "Urgentes", NotificationManager.IMPORTANCE_HIGH)
             )
         }
     }
@@ -46,11 +50,17 @@ object Notificador {
             context, 0, intent, PendingIntent.FLAG_IMMUTABLE
         )
 
-        val notificacion = NotificationCompat.Builder(context, CANAL)
+        val urgente = aviso.origen.urgente
+        val canal = if (urgente) CANAL_URGENTES else CANAL
+        // En Android 7.x no hay canales: la importancia la da la prioridad
+        val prioridad =
+            if (urgente) NotificationCompat.PRIORITY_HIGH else NotificationCompat.PRIORITY_DEFAULT
+
+        val notificacion = NotificationCompat.Builder(context, canal)
             .setSmallIcon(R.drawable.ic_notificacion)
             .setContentTitle(aviso.titulo)
             .setContentText(aviso.texto)
-            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .setPriority(prioridad)
             .setContentIntent(pendiente)
             .setAutoCancel(true)
             .build()

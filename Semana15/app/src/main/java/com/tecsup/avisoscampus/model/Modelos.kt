@@ -1,8 +1,9 @@
 package com.tecsup.avisoscampus.model
 
-enum class Origen(val texto: String) {
+// "urgente" decide por qué canal sale la notificación (lo lee el Notificador)
+enum class Origen(val texto: String, val urgente: Boolean = false) {
     BOTON("Botón"),
-    RECORDATORIO("Recordatorio"),
+    RECORDATORIO("Recordatorio", urgente = true),
     MODO_AVION("Modo avión")
 }
 
