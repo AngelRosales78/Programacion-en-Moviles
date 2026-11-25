@@ -102,3 +102,8 @@ Emulador Medium Phone, API 37.
    Local cuando el aviso nace en el mismo celular (recordatorio, temporizador, modo avión) y
    no necesita internet. Push cuando nace en un servidor o en otro usuario (mensaje de chat,
    nota publicada, comunicado del campus).
+
+## Fase 2 (con IA)
+
+Canal Urgentes, texto largo y receptor del cargador (`receiver/CargadorReceiver.kt`).
+Detalle y capturas en [PROMPTS.md](PROMPTS.md).
