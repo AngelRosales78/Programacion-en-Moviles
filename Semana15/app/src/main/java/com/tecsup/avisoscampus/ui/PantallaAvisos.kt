@@ -57,6 +57,7 @@ import com.tecsup.avisoscampus.viewmodel.AvisosViewModel
 @Composable
 fun PantallaAvisos(vm: AvisosViewModel) {
     val contexto = LocalContext.current
+    val avisos by vm.avisos.collectAsState()
 
     LaunchedEffect(Unit) {
         vm.eventos.collect { aviso ->
@@ -89,7 +90,7 @@ fun PantallaAvisos(vm: AvisosViewModel) {
             TarjetaAvisos(vm)
             TarjetaRecordatorio(vm)
             TarjetaReceptor(vm)
-            Tarjeta(titulo = "Historial") { } // TODO Paso 7: HistorialAvisos
+            HistorialAvisos(avisos)
         }
     }
 }
