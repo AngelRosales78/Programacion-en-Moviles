@@ -40,6 +40,7 @@ class MainActivity : ComponentActivity() {
                 val idSeleccionado by vm.idSeleccionado.collectAsStateWithLifecycle()
                 // Se guarda aquí para que la lista conserve su posición al volver
                 val posicion = rememberLazyListState()
+                val posicionFiltro = rememberLazyListState()
 
                 BackHandler(enabled = idSeleccionado != null) { vm.cerrarDetalle() }
 
@@ -56,7 +57,7 @@ class MainActivity : ComponentActivity() {
                 ) { margen ->
                     val modifier = Modifier.padding(margen)
                     when (val id = idSeleccionado) {
-                        null -> PantallaLista(vm, posicion, modifier)
+                        null -> PantallaLista(vm, posicion, posicionFiltro, modifier)
                         else -> PantallaDetalle(vm, id, modifier)
                     }
                 }
