@@ -35,6 +35,9 @@ class AvisosViewModel(private val repo: AvisosRepository) : ViewModel() {
     private val _faltan = MutableStateFlow<Int?>(null)
     val faltan: StateFlow<Int?> = _faltan.asStateFlow()
 
+    private val _escuchandoAvion = MutableStateFlow(false)
+    val escuchandoAvion: StateFlow<Boolean> = _escuchandoAvion.asStateFlow()
+
     fun permisoRespondido(concedido: Boolean) {
         _permiso.value = if (concedido) PermisoUi.Concedido else PermisoUi.Denegado
     }
@@ -64,7 +67,16 @@ class AvisosViewModel(private val repo: AvisosRepository) : ViewModel() {
         trabajo?.cancel()
     }
 
-    // TODO Paso 6: escuchandoAvion, cambiarEscucha(valor) y alCambiarModoAvion(activo)
+    fun cambiarEscucha(valor: Boolean) {
+        _escuchandoAvion.value = valor
+    }
+
+    fun alCambiarModoAvion(activo: Boolean) {
+        viewModelScope.launch {
+            avisar("Modo avión", if (activo) "Activado" else "Desactivado", Origen.MODO_AVION)
+        }
+    }
+
     // TODO Paso 8: fun noSePudoMostrar()
 
     // Registra el aviso en el historial y pide a la pantalla que lo muestre
